@@ -1,0 +1,203 @@
+/* Pantalla completa i reset bàsic */
+html,
+body,
+#root {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+}
+
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+}
+
+/* Fons general de la pàgina */
+.page {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: stretch;
+  background: radial-gradient(circle at top left, #4f46e5 0, #0f172a 40%, #020617 100%);
+  padding: 0;            /* ⬅️ abans 1.5rem */
+}
+
+
+/* “Card” principal que ocupa gairebé tota la pantalla */
+.homepage {
+  flex: 1;
+  width: 100%;           /* ⬅️ força ocupació total */
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: rgba(15, 23, 42, 0.98);
+  border-radius: 0;      /* ⬅️ opcional: si vols fullscreen real estil webapp */
+  overflow: hidden;
+  box-shadow: none;      /* ⬅️ opcional: queda més pantalla completa */
+  color: #e5e7eb;
+}
+
+/* CAPÇALERA */
+
+.homepage-header {
+  display: flex;
+  align-items: center;
+  padding: 0.9rem 1.75rem;
+  gap: 1.5rem;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.25);
+  background: linear-gradient(to right, #020617, #020617f2);
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.logo-circle {
+  width: 52px;
+  height: 52px;
+  border-radius: 999px;
+  border: 2px solid #f9fafb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.brand {
+  font-weight: 700;
+  font-size: 1.25rem;
+  letter-spacing: 0.03em;
+}
+
+/* BARRA DE CERCA */
+
+.search-bar {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: rgba(15, 23, 42, 0.9);
+  border-radius: 999px;
+  padding: 0.35rem 0.45rem 0.35rem 1rem;
+  border: 1px solid rgba(148, 163, 184, 0.6);
+  box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.7);
+}
+
+.search-bar input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 0.95rem;
+  color: #e5e7eb;
+}
+
+.search-bar input::placeholder {
+  color: #64748b;
+}
+
+.search-bar button {
+  border-radius: 999px;
+  padding: 0.4rem 1.3rem;
+  border: none;
+  background: linear-gradient(135deg, #f97316, #facc15);
+  color: #0f172a;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-transform: lowercase;
+  box-shadow: 0 10px 24px rgba(251, 191, 36, 0.45);
+  transition: transform 0.08s ease-out, box-shadow 0.08s ease-out,
+    filter 0.12s ease-out;
+}
+
+.search-bar button:hover {
+  filter: brightness(1.05);
+  box-shadow: 0 14px 32px rgba(251, 191, 36, 0.6);
+}
+
+.search-bar button:active {
+  transform: translateY(1px) scale(0.98);
+  box-shadow: 0 8px 18px rgba(251, 191, 36, 0.4);
+}
+
+/* SUBNAV / TABS */
+
+.subnav {
+  display: flex;
+  gap: 0.75rem;
+  padding: 0.65rem 1.75rem 0.8rem;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.35);
+  background: linear-gradient(to right, #020617, #020617dc);
+}
+
+.tab {
+  border-radius: 0.9rem;
+  border: 1px solid rgba(148, 163, 184, 0.5);
+  padding: 0.35rem 1rem;
+  background: rgba(15, 23, 42, 0.8);
+  cursor: pointer;
+  font-size: 0.82rem;
+  line-height: 1.1;
+  color: #e5e7eb;
+  letter-spacing: 0.01em;
+  transition: background 0.15s, box-shadow 0.15s, transform 0.05s,
+    border-color 0.15s, color 0.15s;
+  backdrop-filter: blur(8px);
+}
+
+.tab:hover {
+  background: rgba(30, 64, 175, 0.6);
+  border-color: rgba(191, 219, 254, 0.8);
+}
+
+.tab.active {
+  background: radial-gradient(circle at top, #4f46e5, #1d4ed8);
+  border-color: rgba(191, 219, 254, 1);
+  box-shadow: 0 10px 26px rgba(37, 99, 235, 0.6);
+  transform: translateY(-1px);
+}
+
+/* CONTINGUT CENTRAL */
+
+.homepage-main {
+  flex: 1;
+  padding: 1.4rem 1.75rem 1.75rem;
+  background: radial-gradient(circle at top left, #0f172a 0, #020617 55%, #000 100%);
+  overflow: auto;
+}
+
+.homepage-main section {
+  background: radial-gradient(circle at top left, #1f2937, #020617);
+  border-radius: 0.9rem;
+  padding: 1.3rem 1.4rem 1.4rem;
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.9);
+  border: 1px solid rgba(75, 85, 99, 0.7);
+}
+
+.homepage-main h2 {
+  margin: 0 0 0.6rem;
+  font-size: 1.15rem;
+}
+
+.homepage-main p {
+  margin: 0.15rem 0;
+  font-size: 0.92rem;
+  color: #cbd5f5;
+}
+
+/* Scrollbar una mica més neta (opcional) */
+.homepage-main::-webkit-scrollbar {
+  width: 8px;
+}
+.homepage-main::-webkit-scrollbar-track {
+  background: transparent;
+}
+.homepage-main::-webkit-scrollbar-thumb {
+  background: #4b5563;
+  border-radius: 999px;
+}
