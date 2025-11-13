@@ -1,35 +1,49 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState } from "react";
+import { testDB } from "../firebase";
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [result, setResult] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleTest = async () => {
+    setError(null);
+    try {
+      const data = await testDB();
+      setResult(data);
+    } catch (e: any) {
+      console.error(e);
+      setError(e.message || "Error desconegut");
+    }
+  };
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
+    <div style={{ padding: "2rem", fontFamily: "sans-serif" }}>
+      <h1>Test React + Firebase</h1>
+
+      <button onClick={handleTest} style={{ padding: "10px 20px", fontSize: "16px" }}>
+        Provar connexio Firestore
+      </button>
+
+      {error && (
+        <p style={{ color: "red", marginTop: "20px" }}>
+          Error: {error}
         </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+      )}
+
+      {result && (
+        <pre
+          style={{
+            marginTop: "20px",
+            background: "#eee",
+            padding: "20px",
+            borderRadius: "5px",
+          }}
+        >
+          {JSON.stringify(result, null, 2)}
+        </pre>
+      )}
+    </div>
+  );
 }
 
-export default App
+export default App;
