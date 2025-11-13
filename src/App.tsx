@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { testDB } from "../firebase";
+import { testDB } from "./libs/firebase";
 
 function App() {
   const [result, setResult] = useState<any>(null);
