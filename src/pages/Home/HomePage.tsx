@@ -12,8 +12,10 @@ import {
   endAt,
 } from "firebase/firestore";
 
-import { useNavigate } from "react-router-dom"; // ⬅️ AFEGIT
+import { useNavigate } from "react-router-dom";
 import { TopPlayersView } from "./TopPlayersView";
+
+import logo from "../../assets/logo.png";
 
 type View = "openings" | "topPlayers" | "topGames";
 
@@ -160,7 +162,9 @@ function HomePage() {
         {/* CAPÇALERA */}
         <header className="homepage-header">
           <div className="header-left">
-            <div className="logo-circle">logo</div>
+            <div className="logo-circle">
+              <img src={logo} alt="logo" className="logo-img" />
+            </div>
             <span className="brand">ChessStats</span>
           </div>
 
