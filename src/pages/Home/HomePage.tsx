@@ -13,10 +13,11 @@ import {
 } from "firebase/firestore";
 
 import { useNavigate } from "react-router-dom"; // ⬅️ AFEGIT
+import { TopPlayersView } from "./TopPlayersView";
 
 type View = "openings" | "topPlayers" | "topGames";
 
-export type Player = {            // ⬅️ export per poder-lo usar a Profile.tsx
+export type Player = {     
   avatar: string;
   followers: number;
   id: number;
@@ -258,15 +259,6 @@ function OpeningsView() {
         Aquí mostrarem estadístiques d&apos;openings (percentatge de victòries,
         rànquings, etc.).
       </p>
-    </section>
-  );
-}
-
-function TopPlayersView() {
-  return (
-    <section>
-      <h2>Top jugadors</h2>
-      <p>Aquí mostrarem jugadors destacats i els seus rànquings.</p>
     </section>
   );
 }
