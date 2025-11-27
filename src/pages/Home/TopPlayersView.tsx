@@ -9,7 +9,9 @@ import {
 } from "firebase/firestore";
 
 import { db } from "../../libs/firebase";
-import type { Player } from "./HomePage"; // reutilitzem el tipus
+import type { Player } from "./HomePage"; // reutilitzem el tipusç
+import { Link } from "react-router-dom";
+
 
 type LoadStatus = "idle" | "loading" | "loaded" | "error";
 
@@ -146,20 +148,29 @@ export function TopPlayersView() {
         <ol className="players-list">
           {players.map((player, index) => (
             <li key={player.username} className="player-item">
-              <div className="player-rank">#{index + 1}</div>
-              {player.avatar && (
-                <img
-                  src={player.avatar}
-                  alt={player.username}
-                  className="player-avatar-small"
-                />
-              )}
-              <div className="player-info">
-                <strong>{player.username}</strong>
-                {player.name && <span>{player.name}</span>}
-                {player.location && <span>{player.location}</span>}
-              </div>
+              <Link
+                to={`/profile/${player.username.toLowerCase()}`}
+                className="player-link"
+                style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}
+              >
+                <div className="player-rank">#{index + 1}</div>
+
+                {player.avatar && (
+                  <img
+                    src={player.avatar}
+                    alt={player.username}
+                    className="player-avatar-small"
+                  />
+                )}
+
+                <div className="player-info">
+                  <strong>{player.username}</strong>
+                  {player.name && <span>{player.name}</span>}
+                  {player.location && <span>{player.location}</span>}
+                </div>
+              </Link>
             </li>
+
           ))}
         </ol>
       )}

@@ -78,11 +78,39 @@ function Profile() {
         const snap = await getDocs(q);
 
         if (!snap.empty) {
-          const data = snap.docs[0].data() as Player;
-          setPlayer(data);
+          const raw = snap.docs[0].data() as any; // dades directes de Firestore
+
+          // Funció per convertir timestamps Firestore a "YYYY-MM-DD"
+          const normalizeDate = (value: any): string => {
+            if (!value) return "";
+            if (typeof value === "string") return value;
+            if (typeof value === "number") return formatUnixDate(value);
+
+            // Firestore Timestamp = { seconds, nanoseconds }
+            if (value.seconds) return formatUnixDate(value.seconds);
+
+            return "";
+          };
+
+          const normalitzat: Player = {
+            avatar: raw.avatar ?? "",
+            followers: raw.followers ?? 0,
+            id: raw.id ?? 0,
+            is_streamer: raw.is_streamer ?? false,
+            joined: normalizeDate(raw.joined),
+            last_online: normalizeDate(raw.last_online),
+            location: raw.location ?? "",
+            name: raw.name ?? "",
+            status: raw.status ?? "",
+            twitch_url: raw.twitch_url ?? "",
+            username: raw.username ?? username,
+          };
+
+          setPlayer(normalitzat);
           setStatus("ready");
           return;
         }
+
 
         // 2) Si no és a Firestore, mirem Chess.com
         const apiPlayer = await fetchPlayerFromChess(username!);
