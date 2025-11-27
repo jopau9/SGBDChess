@@ -52,7 +52,7 @@ async function fetchTopPlayersFromChessCom(): Promise<Player[]> {
     is_streamer: false, // tampoc ve aquí
     joined: "", // per no fer una crida extra per jugador
     last_online: "",
-    location: p.country ?? "",
+    location: p.country?.replace("https://api.chess.com/pub/country/", "") ?? "",
     name: p.name ?? "",
     status: "", // no hi ha status al leaderboard
     twitch_url: "",
