@@ -69,25 +69,33 @@ async function loadTopPlayersForToday(): Promise<Player[]> {
   const docRef = doc(colRef, todayKey);
 
   // 1) Intentem llegir de Firestore
-  const snap = await getDoc(docRef);
+  try {
+    const snap = await getDoc(docRef);
 
-  if (snap.exists()) {
-    const data = snap.data();
-    const players = (data.players ?? []) as Player[];
-    return players;
+    if (snap.exists()) {
+      const data = snap.data();
+      const players = (data.players ?? []) as Player[];
+      return players;
+    }
+  } catch (err) {
+    console.warn("Error reading from Firestore (offline?), falling back to API:", err);
   }
 
   // 2) Si no existeix doc → demanem a Chess.com
   const players = await fetchTopPlayersFromChessCom();
 
   // 3) Desa-ho a Firestore per reutilitzar-ho durant el dia
-  await setDoc(docRef, {
-    date: todayKey,
-    createdAt: serverTimestamp(),
-    source: "https://api.chess.com/pub/leaderboards",
-    mode: "live_rapid",
-    players,
-  });
+  try {
+    await setDoc(docRef, {
+      date: todayKey,
+      createdAt: serverTimestamp(),
+      source: "https://api.chess.com/pub/leaderboards",
+      mode: "live_rapid",
+      players,
+    });
+  } catch (err) {
+    console.warn("Error saving to Firestore (offline?):", err);
+  }
 
   return players;
 }
