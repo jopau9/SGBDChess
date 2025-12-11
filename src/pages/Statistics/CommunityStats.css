@@ -1,0 +1,229 @@
+/* ===========================
+   VISTA ESTADÍSTIQUES GLOBALS
+=========================== */
+
+.community {
+    display: flex;
+    flex-direction: column;
+    gap: 1.75rem;
+}
+
+/* ---------- HEADER ---------- */
+
+.community-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+
+    padding: 1.4rem 1.6rem;
+    border-radius: 1rem;
+
+    background: linear-gradient(135deg, #020617, #111827);
+    border: 1px solid rgba(148, 163, 184, 0.4);
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.6);
+}
+
+.community-header h2 {
+    font-size: 1.6rem;
+    font-weight: 600;
+    color: #e5e7eb;
+    margin: 0;
+}
+
+.community-subtitle {
+    margin: 0.2rem 0 0;
+    font-size: 0.95rem;
+    color: #9ca3af;
+}
+
+.community-tag {
+    padding: 0.4rem 0.8rem;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    background: rgba(15, 23, 42, 0.9);
+    border: 1px solid rgba(148, 163, 184, 0.6);
+    color: #e5e7eb;
+}
+
+/* ---------- GRID OVERVIEW ---------- */
+
+.community-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1rem;
+}
+
+.community-card {
+    padding: 1.1rem 1.2rem;
+    border-radius: 0.9rem;
+
+    background: radial-gradient(circle at top left, #0f172a, #020617);
+    border: 1px solid rgba(148, 163, 184, 0.3);
+    box-shadow: 0 14px 30px rgba(0, 0, 0, 0.5);
+
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.community-card-primary {
+    background: radial-gradient(circle at top left, #1d4ed8, #020617);
+}
+
+.community-card-label {
+    font-size: 0.9rem;
+    color: #9ca3af;
+}
+
+.community-card-value {
+    font-size: 1.6rem;
+    font-weight: 600;
+    color: #e5e7eb;
+}
+
+.community-card-sub {
+    font-size: 0.85rem;
+    color: #94a3b8;
+}
+
+/* ---------- SECCIONS ---------- */
+
+.community-sections {
+    display: flex;
+    flex-direction: column;
+    gap: 1.75rem;
+}
+
+.community-section {
+    padding: 1.3rem 1.4rem;
+    border-radius: 1rem;
+
+    background: #020617;
+    border: 1px solid rgba(30, 64, 175, 0.45);
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.75);
+
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.community-section h3 {
+    margin: 0;
+    font-size: 1.2rem;
+    color: #e5e7eb;
+}
+
+.community-section-sub {
+    margin: 0;
+    font-size: 0.9rem;
+    color: #9ca3af;
+}
+
+/* ---------- TAULES DE RÀNQUING ---------- */
+
+.community-tables-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    gap: 1rem;
+}
+
+.ranking-card {
+    border-radius: 0.9rem;
+    padding: 0.8rem 0.9rem;
+    background: #020617;
+    border: 1px solid rgba(55, 65, 81, 0.9);
+}
+
+.ranking-title {
+    margin: 0 0 0.6rem;
+    font-size: 0.95rem;
+    color: #e5e7eb;
+}
+
+.ranking-empty {
+    margin: 0.2rem 0 0;
+    font-size: 0.85rem;
+    color: #9ca3af;
+}
+
+.ranking-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+}
+
+.ranking-table th,
+.ranking-table td {
+    padding: 0.35rem 0.4rem;
+    text-align: left;
+}
+
+.ranking-table thead tr {
+    border-bottom: 1px solid rgba(55, 65, 81, 0.9);
+}
+
+.ranking-table tbody tr:nth-child(even) {
+    background: rgba(15, 23, 42, 0.7);
+}
+
+.ranking-table th {
+    color: #94a3b8;
+    font-weight: 500;
+}
+
+.ranking-table td {
+    color: #e5e7eb;
+}
+
+.ranking-player-cell {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.ranking-avatar {
+    width: 22px;
+    height: 22px;
+    border-radius: 999px;
+    object-fit: cover;
+    border: 1px solid rgba(148, 163, 184, 0.7);
+}
+
+/* ---------- LOCALITZACIONS ---------- */
+
+.community-locations {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.community-location-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    font-size: 0.9rem;
+    padding: 0.35rem 0.2rem;
+    border-bottom: 1px dashed rgba(55, 65, 81, 0.9);
+}
+
+.community-location-name {
+    color: #e5e7eb;
+}
+
+.community-location-count {
+    color: #9ca3af;
+}
+
+/* Responsiu simple */
+@media (max-width: 640px) {
+    .community-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .community-tag {
+        align-self: flex-start;
+    }
+}

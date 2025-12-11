@@ -1,7 +1,7 @@
 // src/pages/Home/HomePage.tsx
 import { useState, type FormEvent } from "react";
 import "./HomePage.css";
-import AdvancedCommunityStats from "../Statistics/AdvancedCommunityStats";
+import CommunityStats from "../Statistics/CommunityStats";
 
 import { db } from "../../libs/firebase.ts";
 import {
@@ -266,8 +266,7 @@ function HomePage() {
               {activeView === "topPlayers" && <TopPlayersView />}
               {activeView === "topGames" && <TopGamesView />}
               {activeView === "advancedStats" && (
-                <AdvancedCommunityStats               
-                />
+                <CommunityStats />
               )}
             </>
           )}

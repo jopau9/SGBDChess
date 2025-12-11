@@ -144,9 +144,9 @@ function Profile() {
   const [error, setError] = useState<string | null>(null);
 
   // ⭐ PESTANYA ACTIVA DEL MENÚ LATERAL ⭐
-const [activeTab, setActiveTab] = useState<
-  "rapid" | "openings" | "insights" | "advanced"
->("rapid");
+  const [activeTab, setActiveTab] = useState<
+    "rapid" | "openings" | "insights" | "advanced"
+  >("rapid");
 
 
   useEffect(() => {
@@ -443,7 +443,7 @@ const [activeTab, setActiveTab] = useState<
                         Insights
                       </li>
 
-                    
+
                     </ul>
                   </div>
 
