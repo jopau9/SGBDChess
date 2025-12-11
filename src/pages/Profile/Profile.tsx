@@ -144,9 +144,10 @@ function Profile() {
   const [error, setError] = useState<string | null>(null);
 
   // ⭐ PESTANYA ACTIVA DEL MENÚ LATERAL ⭐
-  const [activeTab, setActiveTab] = useState<
-    "rapid" | "openings" | "insights"
-  >("rapid");
+const [activeTab, setActiveTab] = useState<
+  "rapid" | "openings" | "insights" | "advanced"
+>("rapid");
+
 
   useEffect(() => {
     if (!username) {
@@ -441,6 +442,8 @@ function Profile() {
                       >
                         Insights
                       </li>
+
+                    
                     </ul>
                   </div>
 
@@ -484,15 +487,15 @@ function Profile() {
                       {activeTab === "rapid" && <h3>All Stats</h3>}
                       {activeTab === "openings" && <h3>Openings</h3>}
                       {activeTab === "insights" && <h3>Insights</h3>}
+                      {activeTab === "advanced" && <h3>Advanced Stats</h3>}
 
                       <p className="stats-subtitle">
-                        {activeTab === "rapid" &&
-                          "Resum d'elo i partides per modalitat"}
-                        {activeTab === "openings" &&
-                          "Principals obertures jugades"}
-                        {activeTab === "insights" &&
-                          "Dades avançades i rendiment"}
+                        {activeTab === "rapid" && "Resum d'elo i partides per modalitat"}
+                        {activeTab === "openings" && "Principals obertures jugades"}
+                        {activeTab === "insights" && "Dades avançades i rendiment"}
+                        {activeTab === "advanced" && "Anàlisi profunda del joc: ritme, Elo, obertures i més"}
                       </p>
+
                     </div>
 
                   </div>
@@ -637,7 +640,6 @@ function Profile() {
 
                     </div>
                   )}
-
                 </section>
               </div>
             </section>
