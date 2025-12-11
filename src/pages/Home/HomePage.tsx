@@ -1,6 +1,7 @@
 // src/pages/Home/HomePage.tsx
 import { useState, type FormEvent } from "react";
 import "./HomePage.css";
+import { AdvancedStatsViewIdeas } from "../Statistics/AdvancedStatsIdeas";
 
 import { db } from "../../libs/firebase.ts";
 import {
@@ -17,7 +18,7 @@ import { TopPlayersView } from "./TopPlayersView";
 
 import logo from "../../assets/logo.png";
 
-type View = "openings" | "topPlayers" | "topGames";
+type View = "openings" | "topPlayers" | "topGames" | "advancedStats";
 
 export type PlayerStatsCategory = {
   rating: number;
@@ -168,6 +169,9 @@ function HomePage() {
 
   const isSearchMode = searchTerm.trim().length > 0;
 
+
+
+
   return (
     <div className="page">
       <div className="homepage">
@@ -234,6 +238,15 @@ function HomePage() {
           >
             Top partides
           </button>
+          <button
+            className={activeView === "advancedStats" ? "tab active" : "tab"}
+            onClick={() => {
+              setActiveView("advancedStats");
+              setSearchTerm("");
+            }}
+          >
+            Estadístiques avançades
+          </button>
         </nav>
 
         <main className="homepage-main">
@@ -252,6 +265,12 @@ function HomePage() {
               {activeView === "openings" && <OpeningsView />}
               {activeView === "topPlayers" && <TopPlayersView />}
               {activeView === "topGames" && <TopGamesView />}
+              {activeView === "advancedStats" && (
+                <AdvancedStatsViewIdeas
+                  username="GLOBAL"
+                  player={{ username: "GLOBAL" } as any}
+                />
+              )}
             </>
           )}
         </main>
@@ -360,5 +379,7 @@ function SearchResultsView({
     </section>
   );
 }
+
+
 
 export default HomePage;
