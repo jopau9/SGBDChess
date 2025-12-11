@@ -40,7 +40,8 @@ body {
   width: 50px;
   height: 40px;
   border-radius: 10%;
-  background: white; /* o transparent */
+  background: white;
+  /* o transparent */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -210,9 +211,11 @@ body {
 .homepage-main::-webkit-scrollbar {
   width: 8px;
 }
+
 .homepage-main::-webkit-scrollbar-track {
   background: transparent;
 }
+
 .homepage-main::-webkit-scrollbar-thumb {
   background: #4b5563;
   border-radius: 999px;
@@ -239,7 +242,8 @@ body {
 }
 
 .player-avatar-small {
-  width: 40px;      /* ajusta aquí si la vols més gran/petita */
+  width: 40px;
+  /* ajusta aquí si la vols més gran/petita */
   height: 40px;
   border-radius: 999px;
   object-fit: cover;

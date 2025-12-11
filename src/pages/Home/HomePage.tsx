@@ -19,7 +19,28 @@ import logo from "../../assets/logo.png";
 
 type View = "openings" | "topPlayers" | "topGames";
 
-export type Player = {     
+export type PlayerStatsCategory = {
+  rating: number;
+  games: number;
+  win: number;
+  loss: number;
+  draw: number;
+};
+
+export type PlayerStats = {
+  rapid?: PlayerStatsCategory;
+  blitz?: PlayerStatsCategory;
+  bullet?: PlayerStatsCategory;
+  daily?: PlayerStatsCategory;
+  daily960?: PlayerStatsCategory;
+  puzzles?: {
+    rating: number;
+    best: number;
+    total: number;
+  };
+};
+
+export type Player = {
   avatar: string;
   followers: number;
   id: number;
@@ -31,6 +52,7 @@ export type Player = {
   status: string;
   twitch_url: string;
   username: string;
+  stats?: PlayerStats;
 };
 
 type SearchStatus = "idle" | "loading" | "found" | "not_found" | "error";
@@ -44,16 +66,14 @@ function HomePage() {
   const [searchError, setSearchError] = useState<string | null>(null);
   const [matchingPlayers, setMatchingPlayers] = useState<Player[]>([]);
 
-  const navigate = useNavigate(); // ⬅️ per anar al perfil
+  const navigate = useNavigate();
 
-  // 🔹 helper per convertir timestamps (Chess.com dóna segons Unix)
   function formatUnixDate(ts?: number): string {
     if (!ts) return "";
     const d = new Date(ts * 1000);
-    return d.toISOString().slice(0, 10); // YYYY-MM-DD
+    return d.toISOString().slice(0, 10);
   }
 
-  // 🔹 Cerca a Chess.com si no trobem l'usuari a Firestore
   async function searchPlayerInChessDotCom(
     username: string
   ): Promise<Player | null> {
@@ -63,7 +83,6 @@ function HomePage() {
       );
 
       if (!res.ok) {
-        // 404 o altre codi → no trobat
         return null;
       }
 
@@ -81,6 +100,7 @@ function HomePage() {
         status: data.status ?? "",
         twitch_url: data.twitch_url ?? "",
         username: data.username ?? username,
+        // Les estadístiques es carreguen al Profile, aquí no cal
       };
 
       return player;
@@ -90,12 +110,9 @@ function HomePage() {
     }
   }
 
-  // –– FUNCIONS DE CERCAR
-
   async function searchPlayers(termRaw: string) {
     const term = termRaw.trim();
 
-    // Si buidem la barra, restablim estat i sortim
     if (!term) {
       setSearchStatus("idle");
       setMatchingPlayers([]);
@@ -111,7 +128,6 @@ function HomePage() {
     try {
       const usuarisRef = collection(db, "usuaris");
 
-      // 🔎 Prefix search a Firestore
       const q = query(
         usuarisRef,
         orderBy("username"),
@@ -128,7 +144,6 @@ function HomePage() {
         return;
       }
 
-      // 🔹 Si NO hi ha resultats a Firestore, provem a Chess.com
       const apiPlayer = await searchPlayerInChessDotCom(term);
 
       if (apiPlayer) {
@@ -146,20 +161,16 @@ function HomePage() {
     }
   }
 
-  // Submit del formulari (enter)
   async function handleSearchSubmit(e: FormEvent) {
     e.preventDefault();
     await searchPlayers(searchTerm);
   }
-
-  // –– RENDER
 
   const isSearchMode = searchTerm.trim().length > 0;
 
   return (
     <div className="page">
       <div className="homepage">
-        {/* CAPÇALERA */}
         <header className="homepage-header">
           <div className="header-left">
             <div className="logo-circle">
@@ -178,7 +189,6 @@ function HomePage() {
                 setSearchTerm(value);
 
                 if (!value.trim()) {
-                  // Quan es buida la barra → tornem a la vista per defecte
                   setActiveView("openings");
                   setMatchingPlayers([]);
                   setSearchStatus("idle");
@@ -187,7 +197,6 @@ function HomePage() {
                   return;
                 }
 
-                // Estem en mode cerca
                 searchPlayers(value);
               }}
             />
@@ -195,7 +204,6 @@ function HomePage() {
           </form>
         </header>
 
-        {/* SUB-NAV */}
         <nav className="subnav">
           <button
             className={activeView === "openings" ? "tab active" : "tab"}
@@ -228,7 +236,6 @@ function HomePage() {
           </button>
         </nav>
 
-        {/* CONTINGUT VARIABLE */}
         <main className="homepage-main">
           {isSearchMode ? (
             <SearchResultsView
@@ -237,8 +244,8 @@ function HomePage() {
               players={matchingPlayers}
               errorMessage={searchError ?? undefined}
               onSelectPlayer={(player) =>
-                navigate(`/player/${encodeURIComponent(player.username)}`)
-              } // ⬅️ clicar = anar al perfil
+                navigate(`/profile/${encodeURIComponent(player.username)}`)
+              }
             />
           ) : (
             <>
@@ -252,8 +259,6 @@ function HomePage() {
     </div>
   );
 }
-
-/* PLACEHOLDERS */
 
 function OpeningsView() {
   return (
@@ -284,7 +289,7 @@ type SearchResultsProps = {
   status: SearchStatus;
   players: Player[];
   errorMessage?: string;
-  onSelectPlayer: (player: Player) => void; // ⬅️ nou
+  onSelectPlayer: (player: Player) => void;
 };
 
 function SearchResultsView({
@@ -316,7 +321,8 @@ function SearchResultsView({
 
       {status === "not_found" && (
         <p>
-          No hem trobat cap jugador ni a la nostra base de dades ni a Chess.com. 👀
+          No hem trobat cap jugador ni a la nostra base de dades ni a Chess.com.
+          👀
         </p>
       )}
 
