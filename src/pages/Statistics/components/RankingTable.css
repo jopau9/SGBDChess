@@ -1,0 +1,62 @@
+/* Targeta del rànquing */
+.ranking-card {
+    padding: 1rem;
+    border-radius: 10px;
+    background: #020617;
+    border: 1px solid rgba(55, 65, 81, 0.8);
+    box-shadow: 0 14px 30px rgba(0, 0, 0, 0.5);
+}
+
+/* Títol */
+.ranking-title {
+    margin: 0 0 0.6rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #e5e7eb;
+}
+
+.ranking-empty {
+    color: #94a3b8;
+    font-size: 0.85rem;
+}
+
+/* Taula */
+.ranking-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.88rem;
+}
+
+.ranking-table th,
+.ranking-table td {
+    padding: 0.4rem 0.5rem;
+    text-align: left;
+}
+
+.ranking-table th {
+    color: #9ca3af;
+    font-weight: 500;
+}
+
+.ranking-table tbody tr:nth-child(even) {
+    background: rgba(15, 23, 42, 0.45);
+}
+
+.ranking-table td {
+    color: #e5e7eb;
+}
+
+/* Avatar + nom */
+.ranking-player-cell {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+}
+
+.ranking-avatar {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid rgba(148, 163, 184, 0.5);
+}

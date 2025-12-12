@@ -12,6 +12,7 @@ import {
   getDocs,
   doc,
   setDoc,
+  getDoc,
 } from "firebase/firestore";
 
 import type {
@@ -131,7 +132,225 @@ async function fetchLastMonthsGames(username: string, months = 3) {
   return allGames;
 }
 
+const ECO_BOOK: Record<string, string> = {
+  // A - Flank openings
+  "A00": "Uncommon Opening",
+  "A04": "Reti Opening",
+  "A06": "Zukertort Opening",
+  "A10": "English Opening",
+  "A12": "English Opening: Caro-Kann Defensive System",
+  "A20": "English Opening",
+  "A25": "English Opening: Sicilian Reversed",
+  "A40": "Queen's Pawn Game",
+  "A45": "Trompowsky Attack",
+  "A46": "Queen's Pawn: Torre Attack",
+  "A48": "London System",
+
+  // B - Semi-open (1.e4 defenses)
+  "B00": "King's Pawn Game",
+  "B01": "Scandinavian Defense",
+  "B06": "Robatsch (Modern) Defense",
+  "B07": "Pirc Defense",
+  "B10": "Caro-Kann Defense",
+  "B20": "Sicilian Defense",
+  "B22": "Alapin Sicilian",
+  "B23": "Closed Sicilian",
+  "B30": "Sicilian Defense: Rossolimo",
+  "B40": "Sicilian Defense: Scheveningen",
+
+  // C - Open games (1.e4 e5)
+  "C20": "King's Pawn Game",
+  "C23": "Bishop's Opening",
+  "C30": "King's Gambit",
+  "C40": "King's Knight Opening",
+  "C50": "Italian Game",
+  "C60": "Ruy Lopez",
+  "C65": "Ruy Lopez: Berlin Defense",
+  "C70": "Ruy Lopez: Classical",
+
+  // D - Closed (d4 d5 c4)
+  "D00": "Queen's Pawn Game",
+  "D02": "London System",
+  "D04": "Colle System",
+  "D10": "Slav Defense",
+  "D20": "Queen's Gambit Accepted",
+  "D30": "Queen's Gambit",
+  "D31": "Queen's Gambit Declined",
+
+  // E - Indian Defenses (1.d4 Nf6)
+  "E00": "Indian Defense",
+  "E20": "Nimzo-Indian Defense",
+  "E60": "King's Indian Defense",
+  "E80": "King's Indian Defense: Saemisch",
+
+  // DEFAULT
+};
+
+
+
+function extractOpeningFromPGN(pgn: string): { opening: string; eco: string | null } {
+  if (!pgn) return { opening: "Unknown Opening", eco: null };
+
+  // 1) Intentem agafar ECO real del PGN
+  const ecoMatch = pgn.match(/\[ECO\s+"([^"]+)"\]/i);
+  const eco = ecoMatch ? ecoMatch[1] : null;
+
+  // 2) Intentem agafar Opening real del PGN
+  const openingMatch = pgn.match(/\[Opening\s+"([^"]+)"\]/i);
+  if (openingMatch) {
+    return { opening: openingMatch[1], eco };
+  }
+
+  // 3) Si tenim ECO al llibre → retornem
+  if (eco && ECO_BOOK[eco]) {
+    return { opening: ECO_BOOK[eco], eco };
+  }
+
+  // 4) Detectem la línia de moviments
+  const movesLine = pgn.split("\n").find((l) => /^\s*1\./.test(l));
+  if (!movesLine) return { opening: "Unknown Opening", eco };
+
+  // Neteja comentaris i números
+  const moves = movesLine
+    .replace(/\{[^}]+\}/g, "")
+    .replace(/\d+\.(\.\.)?/g, "")
+    .trim()
+    .split(/\s+/)
+    .map((m) => m.toLowerCase());
+
+  const m1 = moves[0] || "";
+  const m2 = moves[1] || "";
+
+  // 5) Patrons bàsics (captura >70% de partides)
+  if (m1 === "e4") {
+    if (m2 === "c5") return { opening: "Sicilian Defense", eco };
+    if (m2 === "e5") return { opening: "Open Game (1.e4 e5)", eco };
+    if (m2 === "e6") return { opening: "French Defense", eco };
+    if (m2 === "c6") return { opening: "Caro-Kann Defense", eco };
+    if (m2 === "d5") return { opening: "Scandinavian Defense", eco };
+  }
+
+  if (m1 === "d4") {
+    if (m2 === "d5") return { opening: "Queen's Gambit / QGD", eco };
+    if (m2 === "nf6") return { opening: "Indian Defense", eco };
+    if (m2 === "g6") return { opening: "King's Indian / Grünfeld", eco };
+  }
+
+  if (m1 === "c4") return { opening: "English Opening", eco };
+  if (m1 === "nf3") return { opening: "Reti Opening", eco };
+  if (m1 === "g3") return { opening: "King's Fianchetto Opening", eco };
+
+  // 6) Fallback FINAL → sempre coherent
+  return { opening: "Unknown Opening", eco };
+}
+
+
+
+
+async function fetchArchives(username: string) {
+  const url = `https://api.chess.com/pub/player/${username}/games/archives`;
+  const res = await fetch(url);
+  if (!res.ok) return [];
+  const data = await res.json();
+  return data.archives || [];
+}
+
+async function fetchGamesFromArchive(archiveUrl: string) {
+  const res = await fetch(archiveUrl);
+  if (!res.ok) return [];
+  const data = await res.json();
+  return data.games || [];
+}
+
+async function fetchLastMonthsFullPGN(
+  username: string,
+  months = 3,
+  onGameLoaded?: () => void
+) {
+  const archives = await fetchArchives(username);
+  if (archives.length === 0) return [];
+
+  const selected = archives.slice(-months);
+  const all: any[] = [];
+
+  for (const url of selected) {
+    const games = await fetchGamesFromArchive(url);
+
+    for (const g of games) {
+      all.push(g);
+
+      // 🔥 incrementem el comptador en directe
+      if (onGameLoaded) onGameLoaded();
+    }
+  }
+
+  return all;
+}
+
+
+
+
+function safeGameId(g: any, username: string) {
+  if (g.url) {
+    const parts = g.url.split("/");
+    return parts[parts.length - 1]; // últim segment
+  }
+  return `${username}-${g.end_time}`;
+}
+
+async function saveGamesToFirebase(username: string, games: any[]) {
+  const gamesRef = collection(db, "games");
+
+  for (const g of games) {
+    const id = safeGameId(g, username);
+
+
+    const docRef = doc(gamesRef, id);
+    const exists = await getDoc(docRef);
+
+    if (exists.exists()) continue; // ja està guardat
+
+    const isWhite =
+      g.white?.username?.toLowerCase() === username.toLowerCase();
+    const side = isWhite ? g.white : g.black;
+    const opp = isWhite ? g.black : g.white;
+
+    const { opening, eco } = extractOpeningFromPGN(g.pgn || "");
+
+    if (opening === "Unknown Opening") continue;
+
+    const gameData = {
+      username,
+      timestamp: g.end_time || null,
+      opening,
+      eco,
+      color: isWhite ? "white" : "black",
+      result: side?.result || "unknown",
+      opponent_rating: opp?.rating || null,
+      first_move: extractFirstMove(g.pgn || ""),
+      time_class: g.time_class || "unknown",
+    };
+
+    await setDoc(docRef, gameData);
+  }
+}
+
+function extractFirstMove(pgn: string): string {
+  if (!pgn) return "—";
+
+  // Captura el primer moviment després de "1."
+  const match = pgn.match(/^1\.\s*([a-h][1-8]|[NBRQK][a-h][1-8])/m);
+
+  return match ? match[1] : "—";
+}
+
+
+
+
 function Profile() {
+  const [liveGameCount, setLiveGameCount] = useState(0);
+  const [loadingGames, setLoadingGames] = useState(true);
+
   const { username } = useParams<{ username: string }>();
   // --- OPENINGS ---
   const [openings, setOpenings] = useState<any[]>([]);
@@ -157,6 +376,8 @@ function Profile() {
     }
 
     async function loadProfile() {
+
+
       if (!username) return;
       try {
         setStatus("loading");
@@ -228,11 +449,21 @@ function Profile() {
 
         // Guardem el player
         setPlayer(finalPlayer);
-
+        setStatus("ready");
         // ----------------------------
         // 3) CARREGAR PARTIDES REALS (per Openings + Insights)
         // ----------------------------
-        const games = await fetchLastMonthsGames(username, 3); // últims 3 mesos
+        // Activem el comptador ABANS de començar
+        setLoadingGames(true);
+        setLiveGameCount(0);
+
+        const games: any[] = [];
+        await fetchLastMonthsFullPGN(username, 3, () => {
+          setLiveGameCount((c) => c + 1);
+        });
+
+        // últims 3 mesos
+        await saveGamesToFirebase(username, games);
 
         // ----------------------------
         // 4) PROCESSAR OPENINGS
@@ -240,7 +471,10 @@ function Profile() {
         const openingStats: Record<string, any> = {};
 
         for (const g of games) {
-          const opening = g.opening?.name ?? "Unknown Opening";
+          const opening =
+            g.opening?.name ||
+            extractOpeningFromPGN(g.pgn || "") ||
+            "Opening not detected";
           if (!openingStats[opening]) {
             openingStats[opening] = { games: 0, wins: 0, losses: 0, draws: 0 };
           }
@@ -272,6 +506,8 @@ function Profile() {
           .sort((a, b) => b.games - a.games);
 
         setOpenings(openingList);
+
+
 
         // ----------------------------
         // 5) PROCESSAR INSIGHTS
@@ -325,9 +561,8 @@ function Profile() {
           avgOpponentElo: Math.round(avgElo),
           topFirstMove,
         });
+        setLoadingGames(false);
 
-        // Final
-        setStatus("ready");
       } catch (err) {
         console.error(err);
         setError("No s'ha pogut carregar el perfil.");
@@ -387,9 +622,7 @@ function Profile() {
                   <div className="profile-username-row">
                     <h2 className="profile-username">{player.username}</h2>
                     {player.status && (
-                      <span className="profile-status-pill">
-                        {player.status}
-                      </span>
+                      <span className="profile-status-pill">{player.status}</span>
                     )}
                   </div>
 
@@ -442,8 +675,6 @@ function Profile() {
                       >
                         Insights
                       </li>
-
-
                     </ul>
                   </div>
 
@@ -468,11 +699,7 @@ function Profile() {
                     {player.twitch_url && (
                       <div className="profile-meta-row">
                         <span>Twitch</span>
-                        <a
-                          href={player.twitch_url}
-                          target="_blank"
-                          rel="noreferrer"
-                        >
+                        <a href={player.twitch_url} target="_blank" rel="noreferrer">
                           {player.twitch_url}
                         </a>
                       </div>
@@ -480,30 +707,25 @@ function Profile() {
                   </div>
                 </aside>
 
-                {/* ---------- PANE PRINCIPAL ---------- */}
+                {/* ---------- PANEL PRINCIPAL ---------- */}
                 <section className="profile-stats-pane">
                   <div className="stats-header">
                     <div>
                       {activeTab === "rapid" && <h3>All Stats</h3>}
                       {activeTab === "openings" && <h3>Openings</h3>}
                       {activeTab === "insights" && <h3>Insights</h3>}
-                      {activeTab === "advanced" && <h3>Advanced Stats</h3>}
 
                       <p className="stats-subtitle">
                         {activeTab === "rapid" && "Resum d'elo i partides per modalitat"}
                         {activeTab === "openings" && "Principals obertures jugades"}
                         {activeTab === "insights" && "Dades avançades i rendiment"}
-                        {activeTab === "advanced" && "Anàlisi profunda del joc: ritme, Elo, obertures i més"}
                       </p>
-
                     </div>
-
                   </div>
 
+                  {/* ======== CONTINGUT PER PESTANYA ======== */}
 
-
-                  {/* ---------- CONTINGUT PER PESTANYA ---------- */}
-
+                  {/* ---------- RAPID (normal) ---------- */}
                   {activeTab === "rapid" && (
                     <div className="stats-grid">
                       <div className="stat-card stat-card-primary">
@@ -587,58 +809,97 @@ function Profile() {
                     </div>
                   )}
 
+                  {/* ---------- OPENINGS ---------- */}
                   {activeTab === "openings" && (
-                    <div className="openings-list">
-                      {openings.length === 0 && <p>No s'han trobat obertures recents.</p>}
-
-                      {openings.slice(0, 10).map((o) => (
-                        <div className="stat-card" key={o.name}>
-                          <div className="stat-card-label">{o.name}</div>
-                          <div className="stat-card-sub">
-                            {o.games} games – {o.winrate}% WR
-                            <br />
-                            W:{o.wins} / L:{o.losses} / D:{o.draws}
-                          </div>
+                    <>
+                      {loadingGames ? (
+                        <div className="loading-box">
+                          <p>
+                            Carregant partides…{" "}
+                            <strong>{liveGameCount}</strong>
+                          </p>
                         </div>
-                      ))}
-                    </div>
+                      ) : (
+                        <div className="openings-list">
+                          {openings.length === 0 && (
+                            <p>No s'han trobat obertures recents.</p>
+                          )}
+
+                          {openings.slice(0, 10).map((o) => (
+                            <div className="stat-card" key={o.name}>
+                              <div className="stat-card-label">{o.name}</div>
+                              <div className="stat-card-sub">
+                                {o.games} games – {o.winrate}% WR
+                                <br />
+                                W:{o.wins} / L:{o.losses} / D:{o.draws}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </>
                   )}
 
+                  {/* ---------- INSIGHTS ---------- */}
+                  {activeTab === "insights" && (
+                    <>
+                      {loadingGames ? (
+                        <div className="loading-box">
+                          <p>
+                            Carregant partides…{" "}
+                            <strong>{liveGameCount}</strong>
+                          </p>
+                        </div>
+                      ) : (
+                        insights && (
+                          <div className="stats-grid">
+                            <div className="stat-card">
+                              <div className="stat-card-label">Total Games</div>
+                              <div className="stat-card-value">
+                                {insights.totalGames}
+                              </div>
+                            </div>
 
-                  {activeTab === "insights" && insights && (
-                    <div className="stats-grid">
+                            <div className="stat-card">
+                              <div className="stat-card-label">Winrate</div>
+                              <div className="stat-card-value">
+                                {insights.winrate}%
+                              </div>
+                            </div>
 
-                      <div className="stat-card">
-                        <div className="stat-card-label">Total Games</div>
-                        <div className="stat-card-value">{insights.totalGames}</div>
-                      </div>
+                            <div className="stat-card">
+                              <div className="stat-card-label">Games as White</div>
+                              <div className="stat-card-value">
+                                {insights.whiteGames}
+                              </div>
+                            </div>
 
-                      <div className="stat-card">
-                        <div className="stat-card-label">Winrate</div>
-                        <div className="stat-card-value">{insights.winrate}%</div>
-                      </div>
+                            <div className="stat-card">
+                              <div className="stat-card-label">Games as Black</div>
+                              <div className="stat-card-value">
+                                {insights.blackGames}
+                              </div>
+                            </div>
 
-                      <div className="stat-card">
-                        <div className="stat-card-label">Games as White</div>
-                        <div className="stat-card-value">{insights.whiteGames}</div>
-                      </div>
+                            <div className="stat-card">
+                              <div className="stat-card-label">Avg Opponent Elo</div>
+                              <div className="stat-card-value">
+                                {insights.avgOpponentElo}
+                              </div>
+                            </div>
 
-                      <div className="stat-card">
-                        <div className="stat-card-label">Games as Black</div>
-                        <div className="stat-card-value">{insights.blackGames}</div>
-                      </div>
-
-                      <div className="stat-card">
-                        <div className="stat-card-label">Avg Opponent Elo</div>
-                        <div className="stat-card-value">{insights.avgOpponentElo}</div>
-                      </div>
-
-                      <div className="stat-card">
-                        <div className="stat-card-label">Most common first move</div>
-                        <div className="stat-card-value">{insights.topFirstMove}</div>
-                      </div>
-
-                    </div>
+                            <div className="stat-card">
+                              <div className="stat-card-label">
+                                Most common first move
+                              </div>
+                              <div className="stat-card-value">
+                                {insights.topFirstMove}
+                              </div>
+                            </div>
+                          </div>
+                        )
+                      )}
+                    </>
                   )}
                 </section>
               </div>
@@ -648,6 +909,7 @@ function Profile() {
       </div>
     </div>
   );
+
 }
 
 export default Profile;

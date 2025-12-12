@@ -17,8 +17,14 @@ import { useNavigate } from "react-router-dom";
 import { TopPlayersView } from "./TopPlayersView";
 
 import logo from "../../assets/logo.png";
+import WebActivityAnalytics from "../Analytics/WebActivityAnalytics.tsx";
 
-type View = "openings" | "topPlayers" | "topGames" | "advancedStats";
+type View =
+  | "openings"
+  | "topPlayers"
+  | "topGames"
+  | "advancedStats"
+  | "webActivity";
 
 export type PlayerStatsCategory = {
   rating: number;
@@ -247,6 +253,18 @@ function HomePage() {
           >
             Estadístiques avançades
           </button>
+          <button
+            className={activeView === "webActivity" ? "tab active" : "tab"}
+            onClick={() => {
+              setActiveView("webActivity");
+              setSearchTerm("");
+            }}
+          >
+            Web Activity
+            <br />
+            Analytics
+          </button>
+
         </nav>
 
         <main className="homepage-main">
@@ -267,6 +285,9 @@ function HomePage() {
               {activeView === "topGames" && <TopGamesView />}
               {activeView === "advancedStats" && (
                 <CommunityStats />
+              )}
+              {activeView === "webActivity" && (
+                <WebActivityAnalytics />
               )}
             </>
           )}

@@ -1,0 +1,67 @@
+.openings-card {
+    padding: 1rem;
+    border-radius: 0.8rem;
+    background: #0f172a;
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    margin-top: 1.5rem;
+}
+
+.openings-title {
+    margin-bottom: 0.8rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #e2e8f0;
+}
+
+.openings-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+.openings-table th {
+    text-align: left;
+    padding: 0.4rem;
+    color: #94a3b8;
+    font-weight: 500;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.3);
+}
+
+.openings-table td {
+    padding: 0.45rem;
+    color: #f1f5f9;
+}
+
+.openings-table tbody tr:nth-child(even) {
+    background: rgba(148, 163, 184, 0.05);
+}
+
+/* Botó "Mostrar més" */
+.openings-more-wrapper {
+    display: flex;
+    justify-content: center;
+    margin-top: 0.8rem;
+}
+
+.openings-more-btn {
+    padding: 0.45rem 1rem;
+    border-radius: 999px;
+    border: 1px solid rgba(59, 130, 246, 0.7);
+    background: radial-gradient(circle at top left, #1d4ed8, #1e293b);
+    color: #e5e7eb;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: transform 0.08s ease, box-shadow 0.08s ease,
+        background 0.12s ease;
+}
+
+.openings-more-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 20px rgba(37, 99, 235, 0.45);
+}
+
+.openings-more-btn:active {
+    transform: translateY(0);
+    box-shadow: none;
+}

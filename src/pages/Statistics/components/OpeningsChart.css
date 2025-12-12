@@ -1,0 +1,13 @@
+.openings-chart-card {
+    margin-top: 1.2rem;
+    padding: 1rem;
+    background: #0f172a;
+    border-radius: 0.8rem;
+    border: 1px solid rgba(148, 163, 184, 0.25);
+}
+
+.chart-title {
+    font-size: 1.1rem;
+    color: #e2e8f0;
+    margin-bottom: 0.5rem;
+}
