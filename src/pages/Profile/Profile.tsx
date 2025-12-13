@@ -1,5 +1,6 @@
 // src/pages/Profile/Profile.tsx
 import "./Profile.css";
+import logo from "../../assets/logo.png";
 
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
@@ -586,7 +587,9 @@ function Profile() {
       <div className="homepage">
         <header className="homepage-header">
           <div className="header-left">
-            <div className="logo-circle">logo</div>
+            <div className="logo-circle">
+              <img src={logo} alt="logo" className="logo-img" />
+            </div>
             <span className="brand">ChessStats</span>
           </div>
 

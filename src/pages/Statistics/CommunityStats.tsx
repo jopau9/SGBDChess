@@ -44,14 +44,7 @@ export default function CommunityStats() {
   return (
     <div className="page">
       <div className="homepage">
-        <header className="homepage-header">
-          <div className="header-left">
-            <div className="logo-circle">logo</div>
-            <span className="brand">ChessStats</span>
-          </div>
 
-          <Link to="/" className="back-link">← Tornar</Link>
-        </header>
 
         <main className="homepage-main">
           {status === "loading" && <p>Carregant…</p>}
