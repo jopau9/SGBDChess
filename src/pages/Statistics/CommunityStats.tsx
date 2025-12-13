@@ -1,7 +1,7 @@
 import "./CommunityStats.css";
 
-import { useEffect, useState, useMemo } from "react";
-import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+// import { Link } from "react-router-dom"; // Removed unused Link
 
 import { db } from "../../libs/firebase.ts";
 import { collection, getDocs } from "firebase/firestore";

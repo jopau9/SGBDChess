@@ -1,5 +1,4 @@
-// src/pages/Home/HomePage.tsx
-import { useState, type FormEvent } from "react";
+import { useState, useEffect } from "react";
 import "./HomePage.css";
 import CommunityStats from "../Statistics/CommunityStats";
 
@@ -11,13 +10,14 @@ import {
   orderBy,
   startAt,
   endAt,
+  limit,
 } from "firebase/firestore";
 
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { TopPlayersView } from "./TopPlayersView";
 
-import logo from "../../assets/logo.png";
 import WebActivityAnalytics from "../Analytics/WebActivityAnalytics.tsx";
+import Header from "../../components/layout/Header";
 
 type View =
   | "openings"
@@ -60,14 +60,15 @@ export type Player = {
   twitch_url: string;
   username: string;
   stats?: PlayerStats;
+  // Les estadístiques es carreguen al Profile, aquí no cal
 };
 
 type SearchStatus = "idle" | "loading" | "found" | "not_found" | "error";
 
 function HomePage() {
   const [activeView, setActiveView] = useState<View>("openings");
-  const [searchTerm, setSearchTerm] = useState("");
-  const [lastSearch, setLastSearch] = useState<string | null>(null);
+  const [searchParams] = useSearchParams();
+  const q = searchParams.get("q");
 
   const [searchStatus, setSearchStatus] = useState<SearchStatus>("idle");
   const [searchError, setSearchError] = useState<string | null>(null);
@@ -107,7 +108,6 @@ function HomePage() {
         status: data.status ?? "",
         twitch_url: data.twitch_url ?? "",
         username: data.username ?? username,
-        // Les estadístiques es carreguen al Profile, aquí no cal
       };
 
       return player;
@@ -124,13 +124,11 @@ function HomePage() {
       setSearchStatus("idle");
       setMatchingPlayers([]);
       setSearchError(null);
-      setLastSearch(null);
       return;
     }
 
     setSearchStatus("loading");
     setSearchError(null);
-    setLastSearch(term);
 
     try {
       const usuarisRef = collection(db, "usuaris");
@@ -168,58 +166,28 @@ function HomePage() {
     }
   }
 
-  async function handleSearchSubmit(e: FormEvent) {
-    e.preventDefault();
-    await searchPlayers(searchTerm);
-  }
+  useEffect(() => {
+    if (q) {
+      searchPlayers(q);
+    } else {
+      setSearchStatus("idle");
+      setMatchingPlayers([]);
+    }
+  }, [q]);
 
-  const isSearchMode = searchTerm.trim().length > 0;
-
-
-
+  const isSearchMode = !!q;
 
   return (
     <div className="page">
       <div className="homepage">
-        <header className="homepage-header">
-          <div className="header-left">
-            <div className="logo-circle">
-              <img src={logo} alt="logo" className="logo-img" />
-            </div>
-            <span className="brand">ChessStats</span>
-          </div>
-
-          <form className="search-bar" onSubmit={handleSearchSubmit}>
-            <input
-              type="text"
-              placeholder="Busca un jugador"
-              value={searchTerm}
-              onChange={(e) => {
-                const value = e.target.value;
-                setSearchTerm(value);
-
-                if (!value.trim()) {
-                  setActiveView("openings");
-                  setMatchingPlayers([]);
-                  setSearchStatus("idle");
-                  setSearchError(null);
-                  setLastSearch(null);
-                  return;
-                }
-
-                searchPlayers(value);
-              }}
-            />
-            <button type="submit">cerca</button>
-          </form>
-        </header>
+        <Header />
 
         <nav className="subnav">
           <button
             className={activeView === "openings" ? "tab active" : "tab"}
             onClick={() => {
               setActiveView("openings");
-              setSearchTerm("");
+              navigate("/stats");
             }}
           >
             Millors
@@ -230,7 +198,7 @@ function HomePage() {
             className={activeView === "topPlayers" ? "tab active" : "tab"}
             onClick={() => {
               setActiveView("topPlayers");
-              setSearchTerm("");
+              navigate("/stats");
             }}
           >
             Top jugadors
@@ -239,7 +207,7 @@ function HomePage() {
             className={activeView === "topGames" ? "tab active" : "tab"}
             onClick={() => {
               setActiveView("topGames");
-              setSearchTerm("");
+              navigate("/stats");
             }}
           >
             Top partides
@@ -248,7 +216,7 @@ function HomePage() {
             className={activeView === "advancedStats" ? "tab active" : "tab"}
             onClick={() => {
               setActiveView("advancedStats");
-              setSearchTerm("");
+              navigate("/stats");
             }}
           >
             Estadístiques avançades
@@ -257,7 +225,7 @@ function HomePage() {
             className={activeView === "webActivity" ? "tab active" : "tab"}
             onClick={() => {
               setActiveView("webActivity");
-              setSearchTerm("");
+              navigate("/stats");
             }}
           >
             Web Activity
@@ -270,7 +238,7 @@ function HomePage() {
         <main className="homepage-main">
           {isSearchMode ? (
             <SearchResultsView
-              searchTerm={lastSearch ?? searchTerm}
+              searchTerm={q || ""}
               status={searchStatus}
               players={matchingPlayers}
               errorMessage={searchError ?? undefined}
@@ -310,15 +278,123 @@ function OpeningsView() {
 }
 
 function TopGamesView() {
+  const [topRatedGames, setTopRatedGames] = useState<any[]>([]);
+  const [longestGames, setLongestGames] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadTopGames() {
+      try {
+        const gamesRef = collection(db, "games");
+
+        // 1. Top Rated (by opponent_rating)
+        const qRated = query(
+          gamesRef,
+          orderBy("opponent_rating", "desc"),
+          limit(5)
+        );
+        const snapRated = await getDocs(qRated);
+        setTopRatedGames(snapRated.docs.map((d) => ({ id: d.id, ...d.data() })));
+
+        // 2. Longest Games (by move_count)
+        const qLong = query(gamesRef, orderBy("move_count", "desc"), limit(5));
+        const snapLong = await getDocs(qLong);
+        setLongestGames(snapLong.docs.map((d) => ({ id: d.id, ...d.data() })));
+
+        setLoading(false);
+      } catch (err) {
+        console.error("Error loading top games:", err);
+        setLoading(false);
+      }
+    }
+
+    loadTopGames();
+  }, []);
+
+  if (loading) return <p>Carregant partides destacades...</p>;
+
   return (
-    <section>
-      <h2>Top partides</h2>
-      <p>
-        Aquí mostrarem partides espectaculars, llargues o amb sacrificis
-        interessants.
-      </p>
+    <section className="top-games-section">
+      <div className="top-games-column">
+        <h3>🔥 Partides de més nivell</h3>
+        <p className="section-desc">
+          Partides contra els rivals amb més ELO registrades a la base de dades.
+        </p>
+        <div className="games-list">
+          {topRatedGames.map((g, i) => (
+            <Link
+              key={i}
+              to={`/game/${g.id}`}
+              className="game-card-link"
+              state={{ fromTopGames: true }}
+            >
+              <div
+                className="game-card"
+                style={{ animationDelay: `${i * 0.1}s` }}
+              >
+                <div className="game-card-header">
+                  <span className="game-card-players">
+                    {g.username} vs {g.opponent_username || g.opponent_rating}
+                  </span>
+                  <span className="game-result result-top-game">
+                    {formatTopGameResult(g)}
+                  </span>
+                </div>
+                <div className="game-card-meta">
+                  <span>{g.opening}</span>
+                  <span>{g.time_class}</span>
+                </div>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </div>
+
+      <div className="top-games-column">
+        <h3>⏳ Partides més llargues</h3>
+        <p className="section-desc">
+          Les batalles més dures i resistents per nombre de moviments.
+        </p>
+        <div className="games-list">
+          {longestGames.map((g, i) => (
+            <Link
+              key={i}
+              to={`/game/${g.id}`}
+              className="game-card-link"
+              state={{ fromTopGames: true }}
+            >
+              <div
+                className="game-card"
+                style={{ animationDelay: `${i * 0.1}s` }}
+              >
+                <div className="game-card-header">
+                  <span className="game-card-players">
+                    {g.username} vs {g.opponent_username || "Unknown"}
+                  </span>
+                  <span className="game-moves">{g.move_count} moviments</span>
+                </div>
+                <div className="game-card-meta">
+                  <span>{g.opening}</span>
+                  <span className="game-result result-top-game">
+                    {formatTopGameResult(g)}
+                  </span>
+                </div>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </div>
     </section>
   );
+}
+
+function formatTopGameResult(game: any): string {
+  const isWin = game.result === "win";
+  const isLoss = ["checkmated", "resigned", "timeout", "abandoned"].includes(game.result);
+
+  if (isWin) return `Victòria ${game.username}`;
+  if (isLoss) return `Victòria ${game.opponent_username || "Oponent"}`;
+  return "Empat";
 }
 
 type SearchResultsProps = {

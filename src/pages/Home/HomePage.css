@@ -149,14 +149,17 @@ body {
   gap: 0.75rem;
   padding: 0.65rem 1.75rem 0.8rem;
   border-bottom: 1px solid rgba(148, 163, 184, 0.35);
-  background: linear-gradient(to right, #020617, #020617dc);
+  background: rgba(15, 23, 42, 0.8);
+  /* Transparent background */
+  justify-content: center;
 }
 
 .tab {
   border-radius: 0.9rem;
   border: 1px solid rgba(148, 163, 184, 0.5);
   padding: 0.35rem 1rem;
-  background: rgba(15, 23, 42, 0.8);
+  background: rgba(30, 41, 59, 0.6);
+  /* More transparent */
   cursor: pointer;
   font-size: 0.82rem;
   line-height: 1.1;
@@ -165,6 +168,11 @@ body {
   transition: background 0.15s, box-shadow 0.15s, transform 0.05s,
     border-color 0.15s, color 0.15s;
   backdrop-filter: blur(8px);
+  flex: 1;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .tab:hover {
@@ -184,12 +192,17 @@ body {
 .homepage-main {
   flex: 1;
   padding: 1.4rem 1.75rem 1.75rem;
-  background: radial-gradient(circle at top left, #0f172a 0, #020617 55%, #000 100%);
+  background: linear-gradient(to bottom, rgba(15, 23, 42, 0.9), rgba(15, 23, 42, 0.95)),
+    url("https://images.unsplash.com/photo-1586165368502-1bad197a6461?q=80&w=2658&auto=format&fit=crop");
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
   overflow: auto;
 }
 
 .homepage-main section {
-  background: radial-gradient(circle at top left, #1f2937, #020617);
+  background: rgba(30, 41, 59, 0.7);
+  /* Transparent background */
   border-radius: 0.9rem;
   padding: 1.3rem 1.4rem 1.4rem;
   box-shadow: 0 18px 40px rgba(15, 23, 42, 0.9);
@@ -265,4 +278,152 @@ body {
 
 .player-info span {
   color: #9ca3af;
+}
+
+/* TOP GAMES SECTION */
+.top-games-section {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+.top-games-column {
+  background: rgba(30, 41, 59, 0.3);
+  border-radius: 16px;
+  padding: 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.top-games-column h3 {
+  font-size: 1.4rem;
+  margin-bottom: 0.5rem;
+  background: linear-gradient(to right, #fff, #94a3b8);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.section-desc {
+  color: #94a3b8;
+  font-size: 0.9rem;
+  margin-bottom: 1.5rem;
+  line-height: 1.5;
+}
+
+.games-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.game-card-link {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
+
+.game-card {
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  transition: all 0.2s ease-out;
+  position: relative;
+  overflow: hidden;
+  animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.game-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: linear-gradient(to bottom, #4f46e5, #818cf8);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.game-card:hover {
+  transform: translateX(4px);
+  background: rgba(30, 41, 59, 0.8);
+  border-color: rgba(99, 102, 241, 0.3);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.game-card:hover::before {
+  opacity: 1;
+}
+
+.game-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.game-card-players {
+  font-weight: 600;
+  font-size: 1rem;
+  color: #f1f5f9;
+}
+
+.game-result {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  letter-spacing: 0.05em;
+}
+
+.result-win {
+  background: rgba(74, 222, 128, 0.1);
+  color: #4ade80;
+}
+
+.result-loss {
+  background: rgba(248, 113, 113, 0.1);
+  color: #f87171;
+}
+
+.result-draw {
+  background: rgba(148, 163, 184, 0.1);
+  color: #94a3b8;
+}
+
+.game-card-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  color: #64748b;
+}
+
+.game-moves {
+  color: #fbbf24;
+  font-weight: 600;
+}
+
+.result-top-game {
+  color: #60a5fa;
+  /* Blue */
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.85rem;
 }

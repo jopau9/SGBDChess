@@ -13,7 +13,6 @@ import {
   getDocs,
   doc,
   setDoc,
-  getDoc,
 } from "firebase/firestore";
 
 import type {
@@ -21,6 +20,7 @@ import type {
   PlayerStats,
   PlayerStatsCategory,
 } from "../Home/HomePage";
+import ProfileGamesList from "./ProfileGamesList";
 
 type ProfileStatus = "loading" | "ready" | "not_found" | "error";
 
@@ -109,29 +109,9 @@ async function fetchPlayerStatsFromChess(
     return undefined;
   }
 }
-async function fetchMonthlyGames(username: string, year: number, month: number) {
-  const url = `https://api.chess.com/pub/player/${username}/games/${year}/${month}`;
-  const res = await fetch(url);
-  if (!res.ok) return [];
-  const data = await res.json();
-  return data.games ?? [];
-}
 
-async function fetchLastMonthsGames(username: string, months = 3) {
-  const allGames: any[] = [];
-  const now = new Date();
 
-  for (let i = 0; i < months; i++) {
-    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-    const year = d.getFullYear();
-    const month = d.getMonth() + 1;
 
-    const monthly = await fetchMonthlyGames(username, year, month);
-    allGames.push(...monthly);
-  }
-
-  return allGames;
-}
 
 const ECO_BOOK: Record<string, string> = {
   // A - Flank openings
@@ -263,24 +243,30 @@ async function fetchGamesFromArchive(archiveUrl: string) {
   return data.games || [];
 }
 
-async function fetchLastMonthsFullPGN(
+async function fetchRecentGames(
   username: string,
-  months = 3,
+  limitGames = 25,
   onGameLoaded?: () => void
 ) {
   const archives = await fetchArchives(username);
   if (archives.length === 0) return [];
 
-  const selected = archives.slice(-months);
+  // Ordenem inversament per començar pel mes més recent
+  const reversedArchives = archives.reverse();
   const all: any[] = [];
 
-  for (const url of selected) {
+  for (const url of reversedArchives) {
+    if (all.length >= limitGames) break;
+
     const games = await fetchGamesFromArchive(url);
+    // Els jocs de l'arxiu estan en ordre cronològic (del 1 al 30 del mes)
+    // Volem els últims, així que invertim l'array de jocs d'aquest mes
+    const reversedGames = games.reverse();
 
-    for (const g of games) {
+    for (const g of reversedGames) {
+      if (all.length >= limitGames) break;
+
       all.push(g);
-
-      // 🔥 incrementem el comptador en directe
       if (onGameLoaded) onGameLoaded();
     }
   }
@@ -299,6 +285,13 @@ function safeGameId(g: any, username: string) {
   return `${username}-${g.end_time}`;
 }
 
+function countMoves(pgn: string): number {
+  if (!pgn) return 0;
+  // Match move numbers "1.", "2.", etc.
+  const matches = pgn.match(/\d+\./g);
+  return matches ? matches.length : 0;
+}
+
 async function saveGamesToFirebase(username: string, games: any[]) {
   const gamesRef = collection(db, "games");
 
@@ -307,9 +300,12 @@ async function saveGamesToFirebase(username: string, games: any[]) {
 
 
     const docRef = doc(gamesRef, id);
-    const exists = await getDoc(docRef);
 
-    if (exists.exists()) continue; // ja està guardat
+    // OPTIMITZACIÓ: No fem getDoc per estalviar lectures.
+    // Fem directament setDoc amb merge: true.
+    // Si la partida ja existeix, s'actualitzarà. Si no, es crearà.
+    // L'únic inconvenient és que escrivim sempre, però estalviem la lectura.
+    // Com que només processem 25 partides, són 25 escriptures màxim per visita.
 
     const isWhite =
       g.white?.username?.toLowerCase() === username.toLowerCase();
@@ -319,6 +315,13 @@ async function saveGamesToFirebase(username: string, games: any[]) {
     const { opening, eco } = extractOpeningFromPGN(g.pgn || "");
 
     if (opening === "Unknown Opening") continue;
+
+    let opponentName = opp?.username;
+
+    // Si no tenim nom (o és el mateix usuari per error de càlcul), intentem treure-ho del PGN de forma robusta
+    if (!opponentName || opponentName.toLowerCase() === username.toLowerCase()) {
+      opponentName = resolveOpponentName(g.pgn || "", username);
+    }
 
     const gameData = {
       username,
@@ -330,9 +333,13 @@ async function saveGamesToFirebase(username: string, games: any[]) {
       opponent_rating: opp?.rating || null,
       first_move: extractFirstMove(g.pgn || ""),
       time_class: g.time_class || "unknown",
+      pgn: g.pgn || "",
+      move_count: countMoves(g.pgn || ""),
+      url: g.url || "",
+      opponent_username: opponentName || "Unknown",
     };
 
-    await setDoc(docRef, gameData);
+    await setDoc(docRef, gameData, { merge: true });
   }
 }
 
@@ -343,6 +350,29 @@ function extractFirstMove(pgn: string): string {
   const match = pgn.match(/^1\.\s*([a-h][1-8]|[NBRQK][a-h][1-8])/m);
 
   return match ? match[1] : "—";
+}
+
+function resolveOpponentName(pgn: string, currentUsername: string): string | null {
+  if (!pgn) return null;
+
+  const whiteMatch = pgn.match(/\[White\s+"([^"]+)"\]/i);
+  const blackMatch = pgn.match(/\[Black\s+"([^"]+)"\]/i);
+
+  const whiteName = whiteMatch ? whiteMatch[1] : null;
+  const blackName = blackMatch ? blackMatch[1] : null;
+
+  if (whiteName?.toLowerCase() === currentUsername.toLowerCase()) return blackName;
+  if (blackName?.toLowerCase() === currentUsername.toLowerCase()) return whiteName;
+
+  // Si no coincideix cap, potser és que el username de l'API és diferent al del PGN?
+  // Retornem el que no sigui el currentUsername (si n'hi ha un que ho sigui)
+  // Si cap ho és... retornem el contrari del que s'ha detectat com a isWhite?
+  // Per seguretat, si arribem aquí, retornem null o un dels dos si l'altre és null.
+
+  if (whiteName && !blackName) return whiteName; // Raro
+  if (blackName && !whiteName) return blackName; // Raro
+
+  return null;
 }
 
 
@@ -365,7 +395,7 @@ function Profile() {
 
   // ⭐ PESTANYA ACTIVA DEL MENÚ LATERAL ⭐
   const [activeTab, setActiveTab] = useState<
-    "rapid" | "openings" | "insights" | "advanced"
+    "rapid" | "openings" | "insights" | "advanced" | "games"
   >("rapid");
 
 
@@ -458,12 +488,11 @@ function Profile() {
         setLoadingGames(true);
         setLiveGameCount(0);
 
-        const games: any[] = [];
-        await fetchLastMonthsFullPGN(username, 3, () => {
+        const games = await fetchRecentGames(username, 25, () => {
           setLiveGameCount((c) => c + 1);
         });
 
-        // últims 3 mesos
+        // Guardem les partides (optimitzat per lectures)
         await saveGamesToFirebase(username, games);
 
         // ----------------------------
@@ -593,7 +622,7 @@ function Profile() {
             <span className="brand">ChessStats</span>
           </div>
 
-          <Link to="/" className="back-link">
+          <Link to="/stats" className="back-link">
             ← Tornar a l&apos;inici
           </Link>
         </header>
@@ -678,6 +707,13 @@ function Profile() {
                       >
                         Insights
                       </li>
+
+                      <li
+                        className={activeTab === "games" ? "active" : ""}
+                        onClick={() => setActiveTab("games")}
+                      >
+                        Partides
+                      </li>
                     </ul>
                   </div>
 
@@ -717,11 +753,13 @@ function Profile() {
                       {activeTab === "rapid" && <h3>All Stats</h3>}
                       {activeTab === "openings" && <h3>Openings</h3>}
                       {activeTab === "insights" && <h3>Insights</h3>}
+                      {activeTab === "games" && <h3>Partides Recents</h3>}
 
                       <p className="stats-subtitle">
                         {activeTab === "rapid" && "Resum d'elo i partides per modalitat"}
                         {activeTab === "openings" && "Principals obertures jugades"}
                         {activeTab === "insights" && "Dades avançades i rendiment"}
+                        {activeTab === "games" && "Historial de partides recents"}
                       </p>
                     </div>
                   </div>
@@ -810,6 +848,11 @@ function Profile() {
                         </div>
                       )}
                     </div>
+                  )}
+
+                  {/* ---------- GAMES LIST ---------- */}
+                  {activeTab === "games" && (
+                    <ProfileGamesList username={username || ""} />
                   )}
 
                   {/* ---------- OPENINGS ---------- */}
@@ -912,7 +955,6 @@ function Profile() {
       </div>
     </div>
   );
-
 }
 
 export default Profile;
