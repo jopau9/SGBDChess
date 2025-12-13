@@ -42,57 +42,62 @@ export default function CommunityStats() {
   }, []);
 
   return (
-    <div className="page">
-      <div className="homepage">
+    <>
+      {status === "loading" && <p>Carregant…</p>}
+      {status === "error" && <p style={{ color: "red" }}>{error}</p>}
 
+      {status === "ready" && (
+        <div className="community-page">
 
-        <main className="homepage-main">
-          {status === "loading" && <p>Carregant…</p>}
-          {status === "error" && <p style={{ color: "red" }}>{error}</p>}
+          {/* Títol principal */}
+          <div className="animate-fade-in" style={{ animationDelay: "0s" }}>
+            <h2 className="community-title">Estadístiques de la comunitat</h2>
+          </div>
 
-          {status === "ready" && (
-            <div className="community-page">
+          {/* ───────────────────────────────────── */}
+          {/*   RESUM GENERAL                     */}
+          {/* ───────────────────────────────────── */}
+          <div className="animate-fade-in" style={{ animationDelay: "0.1s" }}>
+            <h3 className="section-title">📊 Resum General</h3>
+            <OverviewSection players={players} />
+          </div>
 
-              {/* Títol principal */}
-              <h2 className="community-title">Estadístiques de la comunitat</h2>
+          <div className="section-divider animate-fade-in" style={{ animationDelay: "0.2s" }} />
 
-              {/* ───────────────────────────────────── */}
-              {/*   RESUM GENERAL                     */}
-              {/* ───────────────────────────────────── */}
-              <h3 className="section-title">📊 Resum General</h3>
-              <OverviewSection players={players} />
+          {/* ───────────────────────────────────── */}
+          {/*   RÀNQUINGS                          */}
+          {/* ───────────────────────────────────── */}
+          <div className="animate-fade-in" style={{ animationDelay: "0.3s" }}>
+            <h3 className="section-title">🏆 Rànquings per modalitat</h3>
+            <RankingsSection players={players} />
+          </div>
 
-              <div className="section-divider" />
+          <div className="section-divider animate-fade-in" style={{ animationDelay: "0.4s" }} />
 
-              {/* ───────────────────────────────────── */}
-              {/*   RÀNQUINGS                          */}
-              {/* ───────────────────────────────────── */}
-              <h3 className="section-title">🏆 Rànquings per modalitat</h3>
-              <RankingsSection players={players} />
+          {/* ───────────────────────────────────── */}
+          {/*   LOCALITZACIONS                     */}
+          {/* ───────────────────────────────────── */}
+          <div className="animate-fade-in" style={{ animationDelay: "0.5s" }}>
+            <h3 className="section-title">🌍 Localitzacions dels jugadors</h3>
+            <LocationsSection players={players} />
+          </div>
 
-              <div className="section-divider" />
+          <div className="section-divider animate-fade-in" style={{ animationDelay: "0.6s" }} />
 
-              {/* ───────────────────────────────────── */}
-              {/*   LOCALITZACIONS                     */}
-              {/* ───────────────────────────────────── */}
-              <h3 className="section-title">🌍 Localitzacions dels jugadors</h3>
-              <LocationsSection players={players} />
+          <div className="animate-fade-in" style={{ animationDelay: "0.7s" }}>
+            <h3 className="section-title">♟️ Obertures globals</h3>
+            <GlobalOpeningsSection />
+          </div>
+          <div className="section-divider animate-fade-in" style={{ animationDelay: "0.8s" }} />
 
-              <div className="section-divider" />
+          <div className="animate-fade-in" style={{ animationDelay: "0.9s" }}>
+            <h3 className="section-title">📈 Global Insights</h3>
+            <GlobalInsightsSection />
+          </div>
+          <div className="section-divider animate-fade-in" style={{ animationDelay: "1.0s" }} />
 
-              <h3 className="section-title">♟️ Obertures globals</h3>
-              <GlobalOpeningsSection />
-              <div className="section-divider" />
-
-              <h3 className="section-title">📈 Global Insights</h3>
-              <GlobalInsightsSection />
-              <div className="section-divider" />
-
-            </div>
-          )}
-        </main>
-
-      </div>
-    </div>
+        </div>
+      )}
+    </>
   );
 }

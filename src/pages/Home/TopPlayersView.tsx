@@ -155,7 +155,11 @@ export function TopPlayersView() {
       {status === "loaded" && players.length > 0 && (
         <ol className="players-list">
           {players.map((player, index) => (
-            <li key={player.username} className="player-item">
+            <li
+              key={player.username}
+              className="player-item animate-fade-in"
+              style={{ animationDelay: `${index * 0.05}s` }}
+            >
               <Link
                 to={`/profile/${player.username.toLowerCase()}`}
                 className="player-link"

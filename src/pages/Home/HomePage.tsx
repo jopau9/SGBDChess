@@ -184,7 +184,8 @@ function HomePage() {
 
         <nav className="subnav">
           <button
-            className={activeView === "openings" ? "tab active" : "tab"}
+            className={activeView === "openings" ? "tab active animate-fade-in" : "tab animate-fade-in"}
+            style={{ animationDelay: "0s" }}
             onClick={() => {
               setActiveView("openings");
               navigate("/stats");
@@ -195,7 +196,8 @@ function HomePage() {
             openings
           </button>
           <button
-            className={activeView === "topPlayers" ? "tab active" : "tab"}
+            className={activeView === "topPlayers" ? "tab active animate-fade-in" : "tab animate-fade-in"}
+            style={{ animationDelay: "0.1s" }}
             onClick={() => {
               setActiveView("topPlayers");
               navigate("/stats");
@@ -204,7 +206,8 @@ function HomePage() {
             Top jugadors
           </button>
           <button
-            className={activeView === "topGames" ? "tab active" : "tab"}
+            className={activeView === "topGames" ? "tab active animate-fade-in" : "tab animate-fade-in"}
+            style={{ animationDelay: "0.2s" }}
             onClick={() => {
               setActiveView("topGames");
               navigate("/stats");
@@ -213,7 +216,8 @@ function HomePage() {
             Top partides
           </button>
           <button
-            className={activeView === "advancedStats" ? "tab active" : "tab"}
+            className={activeView === "advancedStats" ? "tab active animate-fade-in" : "tab animate-fade-in"}
+            style={{ animationDelay: "0.3s" }}
             onClick={() => {
               setActiveView("advancedStats");
               navigate("/stats");
@@ -222,7 +226,8 @@ function HomePage() {
             Estadístiques avançades
           </button>
           <button
-            className={activeView === "webActivity" ? "tab active" : "tab"}
+            className={activeView === "webActivity" ? "tab active animate-fade-in" : "tab animate-fade-in"}
+            style={{ animationDelay: "0.4s" }}
             onClick={() => {
               setActiveView("webActivity");
               navigate("/stats");
@@ -267,7 +272,7 @@ function HomePage() {
 
 function OpeningsView() {
   return (
-    <section>
+    <section className="animate-fade-in" style={{ animationDelay: "0.2s" }}>
       <h2>Millors openings</h2>
       <p>
         Aquí mostrarem estadístiques d&apos;openings (percentatge de victòries,
@@ -315,7 +320,7 @@ function TopGamesView() {
 
   return (
     <section className="top-games-section">
-      <div className="top-games-column">
+      <div className="top-games-column animate-fade-in" style={{ animationDelay: "0.1s" }}>
         <h3>🔥 Partides de més nivell</h3>
         <p className="section-desc">
           Partides contra els rivals amb més ELO registrades a la base de dades.
@@ -329,8 +334,8 @@ function TopGamesView() {
               state={{ fromTopGames: true }}
             >
               <div
-                className="game-card"
-                style={{ animationDelay: `${i * 0.1}s` }}
+                className="game-card animate-fade-in"
+                style={{ animationDelay: `${0.2 + i * 0.1}s` }}
               >
                 <div className="game-card-header">
                   <span className="game-card-players">
@@ -350,7 +355,7 @@ function TopGamesView() {
         </div>
       </div>
 
-      <div className="top-games-column">
+      <div className="top-games-column animate-fade-in" style={{ animationDelay: "0.2s" }}>
         <h3>⏳ Partides més llargues</h3>
         <p className="section-desc">
           Les batalles més dures i resistents per nombre de moviments.
@@ -364,8 +369,8 @@ function TopGamesView() {
               state={{ fromTopGames: true }}
             >
               <div
-                className="game-card"
-                style={{ animationDelay: `${i * 0.1}s` }}
+                className="game-card animate-fade-in"
+                style={{ animationDelay: `${0.3 + i * 0.1}s` }}
               >
                 <div className="game-card-header">
                   <span className="game-card-players">
@@ -413,7 +418,7 @@ function SearchResultsView({
   onSelectPlayer,
 }: SearchResultsProps) {
   return (
-    <section>
+    <section className="animate-fade-in">
       <h2>Resultats de la cerca</h2>
 
       {searchTerm && (
@@ -441,10 +446,11 @@ function SearchResultsView({
 
       {status === "found" && players.length > 0 && (
         <ul className="players-list">
-          {players.map((player) => (
+          {players.map((player, i) => (
             <li
               key={player.username}
-              className="player-item"
+              className="player-item animate-fade-in"
+              style={{ animationDelay: `${i * 0.05}s` }}
               onClick={() => onSelectPlayer(player)}
               role="button"
               tabIndex={0}
@@ -473,7 +479,5 @@ function SearchResultsView({
     </section>
   );
 }
-
-
 
 export default HomePage;
