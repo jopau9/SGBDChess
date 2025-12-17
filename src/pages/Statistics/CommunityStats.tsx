@@ -58,7 +58,7 @@ export default function CommunityStats() {
           {/*   RESUM GENERAL                     */}
           {/* ───────────────────────────────────── */}
           <div className="animate-fade-in" style={{ animationDelay: "0.1s" }}>
-            <h3 className="section-title">📊 Resum General</h3>
+            <h3 className="section-title">Resum General</h3>
             <OverviewSection players={players} />
           </div>
 
@@ -68,7 +68,7 @@ export default function CommunityStats() {
           {/*   RÀNQUINGS                          */}
           {/* ───────────────────────────────────── */}
           <div className="animate-fade-in" style={{ animationDelay: "0.3s" }}>
-            <h3 className="section-title">🏆 Rànquings per modalitat</h3>
+            <h3 className="section-title">Rànquings per modalitat</h3>
             <RankingsSection players={players} />
           </div>
 
@@ -78,20 +78,20 @@ export default function CommunityStats() {
           {/*   LOCALITZACIONS                     */}
           {/* ───────────────────────────────────── */}
           <div className="animate-fade-in" style={{ animationDelay: "0.5s" }}>
-            <h3 className="section-title">🌍 Localitzacions dels jugadors</h3>
+            <h3 className="section-title">Localitzacions dels jugadors</h3>
             <LocationsSection players={players} />
           </div>
 
           <div className="section-divider animate-fade-in" style={{ animationDelay: "0.6s" }} />
 
           <div className="animate-fade-in" style={{ animationDelay: "0.7s" }}>
-            <h3 className="section-title">♟️ Obertures globals</h3>
+            <h3 className="section-title">Obertures globals</h3>
             <GlobalOpeningsSection />
           </div>
           <div className="section-divider animate-fade-in" style={{ animationDelay: "0.8s" }} />
 
           <div className="animate-fade-in" style={{ animationDelay: "0.9s" }}>
-            <h3 className="section-title">📈 Global Insights</h3>
+            <h3 className="section-title">Global Insights</h3>
             <GlobalInsightsSection />
           </div>
           <div className="section-divider animate-fade-in" style={{ animationDelay: "1.0s" }} />
