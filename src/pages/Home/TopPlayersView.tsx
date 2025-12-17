@@ -8,8 +8,8 @@ import {
   serverTimestamp,
 } from "firebase/firestore";
 
-import { db } from "../../libs/firebase";
-import type { Player } from "./HomePage"; // reutilitzem el tipusç
+import { db } from "../../libs/firebase.ts";
+import type { Player } from "../../libs/chess";
 import { Link } from "react-router-dom";
 
 

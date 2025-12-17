@@ -1,0 +1,212 @@
+/* Authenticated Background */
+.auth-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  width: 100%;
+  padding: 2rem;
+  background: radial-gradient(circle at top left, #2a2a4a, #1a1a1a);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Background ambient glow effects */
+.auth-container::before,
+.auth-container::after {
+  content: "";
+  position: absolute;
+  width: 300px;
+  height: 300px;
+  border-radius: 50%;
+  filter: blur(80px);
+  z-index: 0;
+  opacity: 0.4;
+  animation: float 10s infinite ease-in-out alternate;
+}
+
+.auth-container::before {
+  background: #646cff;
+  top: -50px;
+  left: -50px;
+}
+
+.auth-container::after {
+  background: #ff6b6b;
+  bottom: -50px;
+  right: -50px;
+  animation-delay: -5s;
+}
+
+@keyframes float {
+  0% {
+    transform: translate(0, 0);
+  }
+
+  100% {
+    transform: translate(30px, 30px);
+  }
+}
+
+/* Glassmorphism Card */
+.auth-box {
+  background: rgba(30, 30, 30, 0.6);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 3rem 2.5rem;
+  border-radius: 20px;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  width: 100%;
+  max-width: 420px;
+  text-align: center;
+  position: relative;
+  z-index: 1;
+  transform: translateY(0);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.auth-box:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.5);
+}
+
+.auth-title {
+  margin-bottom: 0.5rem;
+  font-size: 2.2rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #fff 0%, #a5a5a5 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  letter-spacing: -0.5px;
+}
+
+.auth-subtitle {
+  color: #888;
+  margin-bottom: 2rem;
+  font-size: 0.95rem;
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.5rem;
+  position: relative;
+}
+
+.form-group label {
+  font-size: 0.85rem;
+  color: #ccc;
+  font-weight: 500;
+  margin-left: 4px;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 1rem 1.2rem;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background-color: rgba(0, 0, 0, 0.2);
+  color: #fff;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: #646cff;
+  background-color: rgba(0, 0, 0, 0.4);
+  box-shadow: 0 0 0 4px rgba(100, 108, 255, 0.1);
+}
+
+.form-group input::placeholder {
+  color: rgba(255, 255, 255, 0.2);
+}
+
+.auth-button {
+  margin-top: 1.5rem;
+  background: linear-gradient(135deg, #646cff 0%, #535bf2 100%);
+  color: white;
+  font-weight: 600;
+  padding: 1rem;
+  border-radius: 12px;
+  font-size: 1rem;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(83, 91, 242, 0.3);
+}
+
+.auth-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(83, 91, 242, 0.4);
+  filter: brightness(1.1);
+}
+
+.auth-button:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.auth-button:disabled {
+  background: #3a3a3a;
+  color: #666;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.auth-link {
+  margin-top: 2rem;
+  font-size: 0.9rem;
+  color: #888;
+}
+
+.auth-link a {
+  color: #646cff;
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.2s;
+}
+
+.auth-link a:hover {
+  color: #8e94ff;
+  text-decoration: underline;
+}
+
+.auth-error {
+  color: #ff8e8e;
+  margin-bottom: 1.5rem;
+  background-color: rgba(255, 107, 107, 0.15);
+  padding: 1rem;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  border: 1px solid rgba(255, 107, 107, 0.2);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Animations */
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-in {
+  animation: fadeInScale 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}

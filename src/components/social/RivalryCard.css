@@ -1,0 +1,263 @@
+/* src/components/social/RivalryCard.css */
+.rivalry-card {
+    background: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 20px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.rivalry-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+    border-color: rgba(255, 255, 255, 0.15);
+}
+
+/* Loading State */
+.rivalry-card.loading {
+    min-height: 150px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.spinner-border {
+    width: 30px;
+    height: 30px;
+    border: 3px solid rgba(255, 255, 255, 0.1);
+    border-top-color: #3b82f6;
+    border-radius: 50%;
+    animation: spin 1s infinite linear;
+}
+
+/* Layout */
+.rivalry-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+    position: relative;
+}
+
+.player-side {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    width: 40%;
+}
+
+.avatar-wrapper {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    background: #1e293b;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.avatar-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.avatar-placeholder {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #64748b;
+}
+
+.username {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #e2e8f0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+
+/* VS Badge */
+.vs-badge {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    /* Circle */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    font-style: italic;
+    color: white;
+    box-shadow: 0 0 15px rgba(239, 68, 68, 0.5);
+    border: 3px solid rgba(15, 23, 42, 0.8);
+    /* Match card bg to simulate cutout */
+    z-index: 10;
+}
+
+.vs-badge span {
+    padding-right: 2px;
+    /* Visual balance */
+    font-size: 1rem;
+}
+
+/* Score Bar */
+.rivalry-score-bar {
+    height: 12px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 6px;
+    overflow: hidden;
+    display: flex;
+    margin-bottom: 1.25rem;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.score-segment {
+    height: 100%;
+    transition: width 1s ease-out;
+}
+
+.score-segment.win {
+    background: linear-gradient(90deg, #10b981, #34d399);
+}
+
+.score-segment.draw {
+    background: #64748b;
+}
+
+.score-segment.loss {
+    background: linear-gradient(90deg, #f87171, #ef4444);
+}
+
+/* Stats Text */
+.rivalry-stats-text {
+    display: flex;
+    justify-content: space-between;
+    padding: 0 1rem;
+}
+
+.stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.stat .value {
+    font-size: 1.5rem;
+    font-weight: 800;
+    line-height: 1;
+}
+
+.stat .label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    opacity: 0.6;
+    margin-top: 0.25rem;
+}
+
+.stat.win .value {
+    color: #34d399;
+    text-shadow: 0 0 10px rgba(52, 211, 153, 0.3);
+}
+
+.stat.loss .value {
+    color: #f87171;
+    text-shadow: 0 0 10px rgba(248, 113, 113, 0.3);
+}
+
+.stat.draw .value {
+    color: #94a3b8;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Expansion */
+.rivalry-expand-btn {
+    background: rgba(255, 255, 255, 0.05);
+    border: none;
+    color: #94a3b8;
+    font-size: 0.75rem;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    margin-top: 1.5rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.rivalry-expand-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+.rivalry-details {
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.details-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: 0.5rem;
+    text-align: center;
+    font-size: 0.85rem;
+}
+
+.details-header {
+    color: #64748b;
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 0.7rem;
+    margin-bottom: 0.5rem;
+}
+
+.details-cell {
+    padding: 0.25rem;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.details-cell.type {
+    text-align: left;
+    padding-left: 0.5rem;
+    color: #cbd5e1;
+    font-weight: 500;
+    text-transform: capitalize;
+}
+
+.details-cell.val {
+    font-weight: 700;
+}
+
+.details-cell.val.win {
+    color: #34d399;
+}
+
+.details-cell.val.loss {
+    color: #f87171;
+}
+
+.details-cell.val.draw {
+    color: #94a3b8;
+}

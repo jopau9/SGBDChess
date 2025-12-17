@@ -114,4 +114,90 @@
         width: 100%;
         max-width: none;
     }
+
+    .header-right-group {
+        width: 100%;
+        justify-content: center;
+        flex-direction: column;
+        gap: 1rem;
+    }
+}
+
+/* Header Right Group */
+.header-right-group {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+/* Auth Controls */
+.auth-controls {
+    display: flex;
+    align-items: center;
+}
+
+.auth-links,
+.user-menu {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+/* Login Link */
+.login-link {
+    color: #94a3b8;
+    text-decoration: none;
+    font-size: 0.95rem;
+    font-weight: 600;
+    transition: color 0.2s;
+}
+
+.login-link:hover {
+    color: #fff;
+}
+
+/* Register Button */
+.register-btn {
+    background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+    color: white;
+    text-decoration: none;
+    padding: 0.5rem 1.2rem;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+.register-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(99, 102, 241, 0.4);
+    color: white !important;
+}
+
+/* User Greeting */
+.user-greeting {
+    font-size: 0.95rem;
+    color: #cbd5e1;
+    font-weight: 500;
+}
+
+/* Logout Button */
+.logout-btn {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #cbd5e1;
+    padding: 0.4rem 1rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    backdrop-filter: blur(4px);
+}
+
+.logout-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    color: #fff;
+    border-color: rgba(255, 255, 255, 0.2);
 }

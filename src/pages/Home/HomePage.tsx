@@ -3,6 +3,7 @@ import "./HomePage.css";
 import CommunityStats from "../Statistics/CommunityStats";
 
 import { db } from "../../libs/firebase.ts";
+import { useAuth } from "../../context/AuthContext";
 import {
   collection,
   query,
@@ -16,56 +17,28 @@ import {
 import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { TopPlayersView } from "./TopPlayersView";
 
-
+import WebActivityAnalytics from "../Analytics/WebActivityAnalytics.tsx";
+import FollowingList from "../../components/social/FollowingList";
 import Header from "../../components/layout/Header";
 
 type View =
   | "openings"
   | "topPlayers"
   | "topGames"
-  | "advancedStats";
+  | "advancedStats"
+  | "webActivity"
+  | "following";
 
-export type PlayerStatsCategory = {
-  rating: number;
-  games: number;
-  win: number;
-  loss: number;
-  draw: number;
-};
-
-export type PlayerStats = {
-  rapid?: PlayerStatsCategory;
-  blitz?: PlayerStatsCategory;
-  bullet?: PlayerStatsCategory;
-  daily?: PlayerStatsCategory;
-  daily960?: PlayerStatsCategory;
-  puzzles?: {
-    rating: number;
-    best: number;
-    total: number;
-  };
-};
-
-export type Player = {
-  avatar: string;
-  followers: number;
-  id: number;
-  is_streamer: boolean;
-  joined: string;
-  last_online: string;
-  location: string;
-  name: string;
-  status: string;
-  twitch_url: string;
-  username: string;
-  stats?: PlayerStats;
-  // Les estadístiques es carreguen al Profile, aquí no cal
-};
+import {
+  fetchPlayerFromChess,
+  type Player,
+} from "../../libs/chess";
 
 type SearchStatus = "idle" | "loading" | "found" | "not_found" | "error";
 
 function HomePage() {
   const [activeView, setActiveView] = useState<View>("openings");
+  const { currentUser } = useAuth();
   const [searchParams] = useSearchParams();
   const q = searchParams.get("q");
 
@@ -75,46 +48,9 @@ function HomePage() {
 
   const navigate = useNavigate();
 
-  function formatUnixDate(ts?: number): string {
-    if (!ts) return "";
-    const d = new Date(ts * 1000);
-    return d.toISOString().slice(0, 10);
-  }
+  /* formatUnixDate and searchPlayerInChessDotCom replaced by imports */
 
-  async function searchPlayerInChessDotCom(
-    username: string
-  ): Promise<Player | null> {
-    try {
-      const res = await fetch(
-        `https://api.chess.com/pub/player/${username.toLowerCase()}`
-      );
-
-      if (!res.ok) {
-        return null;
-      }
-
-      const data = await res.json();
-
-      const player: Player = {
-        avatar: data.avatar ?? "",
-        followers: data.followers ?? 0,
-        id: data.player_id ?? 0,
-        is_streamer: data.is_streamer ?? false,
-        joined: formatUnixDate(data.joined),
-        last_online: formatUnixDate(data.last_online),
-        location: data.location ?? "",
-        name: data.name ?? "",
-        status: data.status ?? "",
-        twitch_url: data.twitch_url ?? "",
-        username: data.username ?? username,
-      };
-
-      return player;
-    } catch (err) {
-      console.error("Error consultant Chess.com:", err);
-      return null;
-    }
-  }
+  /* searchPlayerInChessDotCom moved to libs/chess.ts */
 
   async function searchPlayers(termRaw: string) {
     const term = termRaw.trim();
@@ -148,7 +84,8 @@ function HomePage() {
         return;
       }
 
-      const apiPlayer = await searchPlayerInChessDotCom(term);
+
+      const apiPlayer = await fetchPlayerFromChess(term);
 
       if (apiPlayer) {
         setMatchingPlayers([apiPlayer]);
@@ -224,7 +161,34 @@ function HomePage() {
           >
             Estadístiques avançades
           </button>
-        </nav>
+          <button
+            className={activeView === "webActivity" ? "tab active animate-fade-in" : "tab animate-fade-in"}
+            style={{ animationDelay: "0.4s" }}
+            onClick={() => {
+              setActiveView("webActivity");
+              navigate("/stats");
+            }}
+          >
+            Web Activity
+            <br />
+            Analytics
+          </button>
+
+          {currentUser && (
+            <button
+              className={activeView === "following" ? "tab active animate-fade-in" : "tab animate-fade-in"}
+              style={{ animationDelay: "0.5s" }}
+              onClick={() => {
+                setActiveView("following");
+                navigate("/stats");
+              }}
+            >
+              Jugadors
+              <br />
+              Seguits
+            </button>
+          )}
+        </nav >
 
         <main className="homepage-main">
           {isSearchMode ? (
@@ -245,11 +209,20 @@ function HomePage() {
               {activeView === "advancedStats" && (
                 <CommunityStats />
               )}
+              {activeView === "webActivity" && (
+                <WebActivityAnalytics />
+              )}
+              {activeView === "following" && (
+                <div className="animate-fade-in">
+                  <FollowingList />
+                </div>
+              )}
             </>
-          )}
-        </main>
-      </div>
-    </div>
+          )
+          }
+        </main >
+      </div >
+    </div >
   );
 }
 
