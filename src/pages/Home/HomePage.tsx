@@ -3,7 +3,7 @@ import "./HomePage.css";
 import CommunityStats from "../Statistics/CommunityStats";
 
 import { db } from "../../libs/firebase.ts";
-import { useAuth } from "../../context/AuthContext";
+// import { useAuth } from "../../context/AuthContext"; // Removed unused import
 import {
   collection,
   query,
@@ -18,7 +18,6 @@ import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { TopPlayersView } from "./TopPlayersView";
 
 import WebActivityAnalytics from "../Analytics/WebActivityAnalytics.tsx";
-import FollowingList from "../../components/social/FollowingList";
 import Header from "../../components/layout/Header";
 
 type View =
@@ -26,8 +25,7 @@ type View =
   | "topPlayers"
   | "topGames"
   | "advancedStats"
-  | "webActivity"
-  | "following";
+  | "webActivity";
 
 import {
   fetchPlayerFromChess,
@@ -38,7 +36,7 @@ type SearchStatus = "idle" | "loading" | "found" | "not_found" | "error";
 
 function HomePage() {
   const [activeView, setActiveView] = useState<View>("openings");
-  const { currentUser } = useAuth();
+  // const { currentUser } = useAuth(); // unused now
   const [searchParams] = useSearchParams();
   const q = searchParams.get("q");
 
@@ -174,20 +172,6 @@ function HomePage() {
             Analytics
           </button>
 
-          {currentUser && (
-            <button
-              className={activeView === "following" ? "tab active animate-fade-in" : "tab animate-fade-in"}
-              style={{ animationDelay: "0.5s" }}
-              onClick={() => {
-                setActiveView("following");
-                navigate("/stats");
-              }}
-            >
-              Jugadors
-              <br />
-              Seguits
-            </button>
-          )}
         </nav >
 
         <main className="homepage-main">
@@ -211,11 +195,6 @@ function HomePage() {
               )}
               {activeView === "webActivity" && (
                 <WebActivityAnalytics />
-              )}
-              {activeView === "following" && (
-                <div className="animate-fade-in">
-                  <FollowingList />
-                </div>
               )}
             </>
           )

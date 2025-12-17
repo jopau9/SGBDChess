@@ -402,7 +402,7 @@ function Profile() {
 
                   <div className="profile-sidebar-block profile-meta">
                     <div className="profile-meta-row">
-                      <span>Followers</span>
+                      <span>Followers (Chess.com)</span>
                       <strong>{player.followers ?? 0}</strong>
                     </div>
 
@@ -428,7 +428,9 @@ function Profile() {
                     )}
                   </div>
 
-                  <FollowingList />
+                  {myChessUsername && player.username && myChessUsername.toLowerCase() === player.username.toLowerCase() && (
+                    <FollowingList />
+                  )}
                 </aside>
 
                 {/* ---------- PANEL PRINCIPAL ---------- */}

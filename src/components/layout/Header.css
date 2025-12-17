@@ -201,3 +201,34 @@
     color: #fff;
     border-color: rgba(255, 255, 255, 0.2);
 }
+
+.user-profile-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 0.4rem 0.8rem;
+    border-radius: 20px;
+    color: #cbd5e1;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-right: 0.5rem;
+    backdrop-filter: blur(4px);
+}
+
+.user-profile-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    color: #fff;
+    border-color: rgba(255, 255, 255, 0.3);
+    transform: translateY(-1px);
+}
+
+.user-profile-btn svg {
+    width: 1.25rem;
+    height: 1.25rem;
+    color: #34d399;
+    /* Emerald-400 */
+}

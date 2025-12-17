@@ -4,11 +4,14 @@ import "./Settings.css";
 import Header from "../../components/layout/Header";
 import { useAuth } from "../../context/AuthContext";
 import { updateUserChessUsername, getUserAccount } from "../../libs/auth";
+import { fetchPlayerFromChess, fetchPlayerStatsFromChess } from "../../libs/chess";
+import { db } from "../../libs/firebase";
+import { collection, doc, setDoc } from "firebase/firestore";
 
 type LinkStatus = "idle" | "verifying" | "success" | "error";
 
 export default function Settings() {
-    const { currentUser } = useAuth();
+    const { currentUser, refreshUserProfile } = useAuth();
     const [chessUsername, setChessUsername] = useState("");
     const [status, setStatus] = useState<LinkStatus>("idle");
     const [message, setMessage] = useState("");
@@ -60,17 +63,28 @@ export default function Settings() {
 
         setStatus("verifying");
         try {
-            // Verify one last time before saving
-            const res = await fetch(`https://api.chess.com/pub/player/${chessUsername.toLowerCase()}`);
-            if (!res.ok) {
+            // 1) Fetch full profile and stats (Consistent with Profile.tsx logic)
+            const apiPlayer = await fetchPlayerFromChess(chessUsername.toLowerCase());
+            if (!apiPlayer) {
                 setStatus("error");
-                setMessage("Usuari no vàlid. Comprova el nom.");
+                setMessage("Usuari no trobat a Chess.com.");
                 return;
             }
 
-            await updateUserChessUsername(currentUser.uid, chessUsername);
+            const stats = await fetchPlayerStatsFromChess(apiPlayer.username);
+            const finalPlayer = { ...apiPlayer, stats };
+
+            // 2) Save to general "usuaris" collection (Mirroring Profile.tsx)
+            const usuarisRef = collection(db, "usuaris");
+            const docRef = doc(usuarisRef, apiPlayer.username.toLowerCase());
+            await setDoc(docRef, finalPlayer);
+
+            // 3) Update user's specific account link
+            await updateUserChessUsername(currentUser.uid, apiPlayer.username);
+            await refreshUserProfile();
+
             setStatus("success");
-            setMessage("Compte vinculat correctament!");
+            setMessage("Compte vinculat i perfil sincronitzat!");
         } catch (err) {
             console.error(err);
             setStatus("error");
