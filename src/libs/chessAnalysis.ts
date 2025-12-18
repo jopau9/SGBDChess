@@ -1,5 +1,5 @@
 
-import { Chess, Move } from "chess.js";
+import { Chess } from "chess.js";
 
 // Types for analysis result
 export interface AnalysisResult {
@@ -126,8 +126,8 @@ export async function processGameAnalysis(pgn: string): Promise<AnalysisResult> 
 
             // 4. Simulated Accuracy (Re-using logic)
             // Existing logic or slightly refined
-            const simulatedAcc = simulateAccuracy(header['Result'], moves.length);
-
+            const simulatedAcc = simulateAccuracy(header['Result'] || "*", moves.length);
+            
             resolve({
                 opening: openingName,
                 accuracy: simulatedAcc,
