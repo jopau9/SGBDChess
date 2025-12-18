@@ -117,13 +117,26 @@ function SummaryContent() {
         boxSizing: "border-box"
     };
 
-    const safeDate = (timestamp: any) => {
-        if (!timestamp) return "an unknown date";
-        try {
-            const date = new Date(timestamp * 1000);
-            if (isNaN(date.getTime())) return "an invalid date";
-            return date.toLocaleDateString("en-US", { year: 'numeric', month: 'long', day: 'numeric' });
-        } catch { return "an error date"; }
+    const safeDate = (val: any) => {
+        if (!val) return "an unknown date";
+
+        let date;
+        // Check if it's a string that looks like a date (YYYY-MM-DD or ISO)
+        if (typeof val === "string" && (val.includes("-") || val.includes("/"))) {
+            date = new Date(val);
+        } else if (typeof val === "number") {
+            // Assume unix timestamp in seconds
+            date = new Date(val * 1000);
+        } else if (val && typeof val === "object" && val.seconds) {
+            // Firestore Timestamp
+            date = new Date(val.seconds * 1000);
+        } else {
+            // Fallback or try parsing directly
+            date = new Date(val);
+        }
+
+        if (isNaN(date.getTime())) return "an invalid date";
+        return date.toLocaleDateString("en-US", { year: 'numeric', month: 'long', day: 'numeric' });
     };
 
     if (status === "loading") return <div style={containerStyle}>Generating system knowledge base...</div>;

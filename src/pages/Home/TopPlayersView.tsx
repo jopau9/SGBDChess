@@ -16,9 +16,6 @@ import { Link } from "react-router-dom";
 type LoadStatus = "idle" | "loading" | "loaded" | "error";
 
 function getTodayKey(): string {
-  // 🔹 Si vols ser estrictament local (Europe/Madrid), podries fer servir
-  // una llibreria com dayjs o luxon. Per ara fem servir la data local
-  // amb format YYYY-MM-DD sense dependències externes:
   const now = new Date();
   const year = now.getFullYear();
   const month = String(now.getMonth() + 1).padStart(2, "0");
@@ -35,31 +32,59 @@ async function fetchTopPlayersFromChessCom(): Promise<Player[]> {
 
   const data = await res.json();
 
-  // 🔹 Escollim, per exemple, el leaderboard de live_rapid
-  const rapid = data.live_rapid as any[];
+  // 1. Get lists for Rapid, Blitz, Bullet
+  const rapid = (data.live_rapid || []) as any[];
+  const blitz = (data.live_blitz || []) as any[];
+  const bullet = (data.live_bullet || []) as any[];
 
-  if (!Array.isArray(rapid) || rapid.length === 0) {
-    throw new Error("Chess.com no ha retornat dades de live_rapid");
-  }
+  // 2. Merge into a map to find max rating per player
+  const playersMap = new Map<string, any>();
 
-  // Ens quedem amb els 50 primers (o el que vulguis)
-  const top = rapid.slice(0, 50);
+  const processList = (list: any[], mode: string) => {
+    for (const p of list) {
+      const username = p.username;
+      const rating = p.score; // Leaderboard 'score' is the rating
 
-  const players: Player[] = top.map((p) => ({
-    avatar: p.avatar ?? "",
-    followers: 0, // l'endpoint de leaderboards no ho dóna
-    id: p.player_id ?? 0,
-    is_streamer: false, // tampoc ve aquí
-    joined: "", // per no fer una crida extra per jugador
-    last_online: "",
-    location: p.country?.replace("https://api.chess.com/pub/country/", "") ?? "",
-    name: p.name ?? "",
-    status: "", // no hi ha status al leaderboard
-    twitch_url: "",
-    username: p.username ?? "",
-  }));
+      if (!playersMap.has(username)) {
+        playersMap.set(username, {
+          avatar: p.avatar ?? "",
+          followers: 0,
+          id: p.player_id ?? 0,
+          is_streamer: false,
+          joined: "",
+          last_online: "",
+          location: p.country?.replace("https://api.chess.com/pub/country/", "") ?? "",
+          name: p.name ?? "",
+          status: "",
+          twitch_url: "",
+          username: p.username ?? "",
+          maxRating: rating,
+          bestMode: mode
+        });
+      } else {
+        const existing = playersMap.get(username);
+        if (rating > existing.maxRating) {
+          existing.maxRating = rating;
+          existing.bestMode = mode;
+        }
+      }
+    }
+  };
 
-  return players;
+  processList(rapid, "Rapid");
+  processList(blitz, "Blitz");
+  processList(bullet, "Bullet");
+
+  // 3. Convert to array and sort by maxRating
+  const allPlayers = Array.from(playersMap.values());
+  allPlayers.sort((a, b) => b.maxRating - a.maxRating);
+
+  // 4. Take top 50
+  const top50 = allPlayers.slice(0, 50);
+
+  // 5. Convert to Player type (adding maxRating as a custom property if needed, or just storing it)
+  // We'll cast to Player but keep the extra props for display if we want
+  return top50 as Player[];
 }
 
 async function loadTopPlayersForToday(): Promise<Player[]> {
@@ -74,8 +99,12 @@ async function loadTopPlayersForToday(): Promise<Player[]> {
 
     if (snap.exists()) {
       const data = snap.data();
-      const players = (data.players ?? []) as Player[];
-      return players;
+      // Check if it's the new format (merged)
+      if (data.mode === "merged_max_rating") {
+        const players = (data.players ?? []) as Player[];
+        return players;
+      }
+      // If old format, ignore and fetch fresh
     }
   } catch (err) {
     console.warn("Error reading from Firestore (offline?), falling back to API:", err);
@@ -90,7 +119,7 @@ async function loadTopPlayersForToday(): Promise<Player[]> {
       date: todayKey,
       createdAt: serverTimestamp(),
       source: "https://api.chess.com/pub/leaderboards",
-      mode: "live_rapid",
+      mode: "merged_max_rating",
       players,
     });
   } catch (err) {
@@ -102,7 +131,7 @@ async function loadTopPlayersForToday(): Promise<Player[]> {
 
 export function TopPlayersView() {
   const [status, setStatus] = useState<LoadStatus>("idle");
-  const [players, setPlayers] = useState<Player[]>([]);
+  const [players, setPlayers] = useState<any[]>([]); // Use any to access maxRating
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -136,10 +165,9 @@ export function TopPlayersView() {
 
   return (
     <section>
-      <h2>Top jugadors (live rapid)</h2>
+      <h2>Top jugadors (Global)</h2>
       <p style={{ fontSize: "0.9rem", opacity: 0.7 }}>
-        Es mostra el top del dia. La primera vegada que algú obre aquesta
-        secció, es guarda a la base de dades per reutilitzar-lo.
+        Els 50 millors jugadors del món segons la seva puntuació més alta (Rapid, Blitz o Bullet).
       </p>
 
       {status === "loading" && <p>Carregant top jugadors…</p>}
@@ -163,7 +191,7 @@ export function TopPlayersView() {
               <Link
                 to={`/profile/${player.username.toLowerCase()}`}
                 className="player-link"
-                style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}
+                style={{ display: "flex", alignItems: "center", gap: "0.75rem", width: "100%" }}
               >
                 <div className="player-rank">#{index + 1}</div>
 
@@ -175,10 +203,15 @@ export function TopPlayersView() {
                   />
                 )}
 
-                <div className="player-info">
+                <div className="player-info" style={{ flex: 1 }}>
                   <strong>{player.username}</strong>
                   {player.name && <span>{player.name}</span>}
                   {player.location && <span>{player.location}</span>}
+                </div>
+
+                <div className="player-rating" style={{ textAlign: "right", minWidth: "80px" }}>
+                  <strong style={{ fontSize: "1.1em", color: "#4caf50" }}>{player.maxRating}</strong>
+                  <div style={{ fontSize: "0.8em", opacity: 0.7 }}>{player.bestMode}</div>
                 </div>
               </Link>
             </li>

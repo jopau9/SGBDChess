@@ -37,11 +37,7 @@ export default function RivalryCard({
         }
     }, [myChessUsername, opponentChessUsername]);
 
-    if (loading) return (
-        <div className="rivalry-card loading">
-            <div className="spinner-border"></div>
-        </div>
-    );
+    if (loading) return null;
 
     if (!stats || stats.total === 0) return null;
 
