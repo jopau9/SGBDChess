@@ -611,3 +611,39 @@
         transform: translateY(0);
     }
 }
+
+/* Locked Analysis Box */
+.analysis-locked-box {
+    background-color: rgba(30, 41, 59, 0.5);
+    padding: 1.5rem;
+    border-radius: 12px;
+    text-align: center;
+    border: 1px dashed rgba(255, 255, 255, 0.2);
+    margin-top: 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
+.analysis-locked-box p {
+    margin: 0;
+    color: #cbd5e1;
+}
+
+.btn-login-small {
+    background-color: #3b82f6;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: background 0.2s;
+    display: inline-block;
+}
+
+.btn-login-small:hover {
+    background-color: #2563eb;
+    transform: translateY(-1px);
+}

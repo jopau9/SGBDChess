@@ -1,18 +1,61 @@
-rules_version='2'
-
+rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    
+    // Helper function to check if user is signed in
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    // Helper function to check if user is accessing their own data
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    // PRIVATE ACCOUNTS: specific user data (email, sensitive info)
+    // Only the user themselves can read or write their own account doc
+    match /accounts/{userId} {
+      allow read, write: if isOwner(userId);
+      
+      // Allow users to manage their own 'following' list
+      match /following/{followedId} {
+        allow read, write: if isOwner(userId);
+      }
+    }
+    // PUBLIC PROFILES: 'usuaris'
+    match /usuaris/{username} {
+      allow read: if true;
+      // Allow write to enable caching for all users (guests included)
+      allow write: if true;
+    }
+
+    // GAMES: 'games'
+    match /games/{gameId} {
+      allow read: if true;
+      
+      // Allow caching new games (Guest/User)
+      allow create: if true;
+      
+      // Allow updates (cache refresh), BUT protect 'analysis' fields
+      allow update: if isAuthenticated() 
+                    // Guests can update basic fields (like pgn, eco, etc) but NOT analysis
+                    || (!request.resource.data.diff(resource.data).affectedKeys()
+                        .hasAny(['analysis', 'accuracy', 'processedAt']));
+    }
+    // LEADERBOARDS: 'topPlayersDaily'
+    // Read-only for users. Written by backend/admin processes.
+    match /topPlayersDaily/{document=**} {
+      allow read: if true;
+      allow write: if false; // Deny client writes
+    }
+    // ANALYTICS: 'web_activity'
+    // Clients can log activity (create), but not read or modify existing logs
+    match /web_activity/{document=**} {
+      allow create: if true; // Or isAuthenticated() if you only track logged-in users
+      allow read, update, delete: if false;
+    }
+    
+    // Default deny for anything else
     match /{document=**} {
-      // This rule allows anyone with your database reference to view, edit,
-      // and delete all data in your database. It is useful for getting
-      // started, but it is configured to expire after 30 days because it
-      // leaves your app open to attackers. At that time, all client
-      // requests to your database will be denied.
-      //
-      // Make sure to write security rules for your app before that time, or
-      // else all client requests to your database will be denied until you
-      // update your rules.
-      allow read, write: if request.time < timestamp.date(2030, 11, 22);
+      allow read, write: if false;
     }
   }
 }

@@ -154,6 +154,7 @@ function Profile() {
                         };
 
                         // Guardem a Firestore (merge)
+                        // Guardem a Firestore (merge)
                         const docRef = doc(usuarisRef, apiPlayer.username.toLowerCase());
                         await setDoc(docRef, updatedPlayer, { merge: true });
 

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, Link, useLocation } from "react-router-dom";
 import { db } from "../../libs/firebase";
+import { useAuth } from "../../context/AuthContext";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import Header from "../../components/layout/Header";
 import "./GameDetails.css";
@@ -10,6 +11,7 @@ export default function GameDetails() {
     const { gameId } = useParams<{ gameId: string }>();
     const location = useLocation();
     const fromTopGames = location.state?.fromTopGames;
+    const { currentUser } = useAuth(); // Access auth state
 
     const [game, setGame] = useState<any | null>(null);
     const [loading, setLoading] = useState(true);
@@ -17,6 +19,9 @@ export default function GameDetails() {
 
     // Track analysis state separately to show loading in that specific section
     const [analyzing, setAnalyzing] = useState(false);
+
+    // Shows "Login required" instead of auto-analyzing
+    const [loginRequiredForAnalysis, setLoginRequiredForAnalysis] = useState(false);
 
     useEffect(() => {
         async function loadGame() {
@@ -31,9 +36,14 @@ export default function GameDetails() {
                     setGame(data);
 
                     // Trigger analysis if missing opening OR accuracy OR extended analysis
-                    // We do this AFTER setting the game so the user sees the page immediately
                     if (data.pgn && (!data.opening || !data.accuracy || !data.analysis)) {
-                        triggerAnalysis(data.pgn, docRef);
+                        // Only trigger if USER IS LOGGED IN
+                        if (currentUser) {
+                            triggerAnalysis(data.pgn, docRef);
+                        } else {
+                            // Guest mode: Do NOT trigger analysis, show prompts instead
+                            setLoginRequiredForAnalysis(true);
+                        }
                     }
                 } else {
                     setError("Partida no trobada.");
@@ -153,7 +163,13 @@ export default function GameDetails() {
                         {/* NEW GAME ANALYSIS SECTION */}
                         <div className="game-analysis-section">
                             <h3>🔍 Game Analysis</h3>
-                            {analyzing ? (
+
+                            {loginRequiredForAnalysis && !game.analysis ? (
+                                <div className="analysis-locked-box">
+                                    <p>🔒 Inicia sessió per generar un anàlisi detallat (precisió, blunders, etc).</p>
+                                    <Link to="/login" className="btn-login-small">Iniciar Sessió</Link>
+                                </div>
+                            ) : analyzing ? (
                                 <div className="analysis-loading">
                                     <div className="spinner-small"></div>
                                     <p>Processant partida (Analitzant PGN)...</p>
