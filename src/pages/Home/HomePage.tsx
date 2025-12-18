@@ -116,18 +116,7 @@ function HomePage() {
         <Header />
 
         <nav className="subnav">
-          <button
-            className={activeView === "openings" ? "tab active animate-fade-in" : "tab animate-fade-in"}
-            style={{ animationDelay: "0s" }}
-            onClick={() => {
-              setActiveView("openings");
-              navigate("/stats");
-            }}
-          >
-            Millors
-            <br />
-            openings
-          </button>
+          
           <button
             className={activeView === "topPlayers" ? "tab active animate-fade-in" : "tab animate-fade-in"}
             style={{ animationDelay: "0.1s" }}
