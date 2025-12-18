@@ -22,7 +22,6 @@ import {
 
 import type {
     Player,
-    PlayerStats,
 } from "../../libs/chess";
 import {
     fetchPlayerFromChess,
