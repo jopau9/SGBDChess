@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import { useParams, Link, useLocation } from "react-router-dom";
 import { db } from "../../libs/firebase";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, updateDoc } from "firebase/firestore";
 import Header from "../../components/layout/Header";
 import "./GameDetails.css";
+import { processGameAnalysis } from "../../libs/chessAnalysis";
 
 export default function GameDetails() {
     const { gameId } = useParams<{ gameId: string }>();
@@ -14,6 +15,9 @@ export default function GameDetails() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
+    // Track analysis state separately to show loading in that specific section
+    const [analyzing, setAnalyzing] = useState(false);
+
     useEffect(() => {
         async function loadGame() {
             if (!gameId) return;
@@ -23,7 +27,14 @@ export default function GameDetails() {
                 const snap = await getDoc(docRef);
 
                 if (snap.exists()) {
-                    setGame(snap.data());
+                    const data = snap.data();
+                    setGame(data);
+
+                    // Trigger analysis if missing opening OR accuracy OR extended analysis
+                    // We do this AFTER setting the game so the user sees the page immediately
+                    if (data.pgn && (!data.opening || !data.accuracy || !data.analysis)) {
+                        triggerAnalysis(data.pgn, docRef);
+                    }
                 } else {
                     setError("Partida no trobada.");
                 }
@@ -36,7 +47,35 @@ export default function GameDetails() {
         }
 
         loadGame();
-    }, [gameId]);
+    }, [gameId]); // Only re-run if gameId changes
+
+    const triggerAnalysis = async (pgn: string, docRef: any) => {
+        setAnalyzing(true);
+        try {
+            console.log("Starting background analysis...");
+            const results = await processGameAnalysis(pgn);
+
+            // Save to Firebase
+            await updateDoc(docRef, {
+                opening: results.opening,
+                accuracy: results.accuracy,
+                analysis: results.analysis, // Add extended analysis
+                processedAt: results.processedAt
+            });
+
+            // Update local state
+            setGame((prev: any) => ({
+                ...prev,
+                opening: results.opening,
+                accuracy: results.accuracy,
+                analysis: results.analysis
+            }));
+        } catch (error) {
+            console.error("Analysis failed:", error);
+        } finally {
+            setAnalyzing(false);
+        }
+    };
 
     if (loading) return <div className="game-details-loading"><div className="spinner"></div><p>Carregant partida...</p></div>;
     if (error) return <div className="game-details-error"><p>{error}</p><Link to="/" className="btn-back">Tornar</Link></div>;
@@ -44,17 +83,14 @@ export default function GameDetails() {
 
     const isWin = game.result === "win";
     const isLoss = ["checkmated", "resigned", "timeout", "abandoned"].includes(game.result);
-    // const isDraw = !isWin && !isLoss; // Unused
 
     let resultClass = isWin ? "win" : isLoss ? "loss" : "draw";
     let resultEmoji = getResultEmoji(game.result);
-
-    // Logic for result text
     let resultText = translateResult(game.result);
-    if (fromTopGames) {
-        resultClass = "top-game"; // Blue theme
-        resultEmoji = "🤝"; // Handshake / Waving hands
 
+    if (fromTopGames) {
+        resultClass = "top-game";
+        resultEmoji = "🤝";
         if (isWin) {
             resultText = `VICTÒRIA PER A ${game.username.toUpperCase()}`;
         } else if (isLoss) {
@@ -82,7 +118,6 @@ export default function GameDetails() {
                         <div className="result-hero">
                             <div className="result-icon">{resultEmoji}</div>
                             <h1 className="result-title">{resultText}</h1>
-                            <p className="result-subtitle">{game.opening}</p>
                         </div>
 
                         <div className="players-showcase">
@@ -113,6 +148,92 @@ export default function GameDetails() {
                                 </div>
                                 {isLoss && <div className="winner-badge">WINNER</div>}
                             </div>
+                        </div>
+
+                        {/* NEW GAME ANALYSIS SECTION */}
+                        <div className="game-analysis-section">
+                            <h3>🔍 Game Analysis</h3>
+                            {analyzing ? (
+                                <div className="analysis-loading">
+                                    <div className="spinner-small"></div>
+                                    <p>Processant partida (Analitzant PGN)...</p>
+                                </div>
+                            ) : (
+                                <div className="analysis-content">
+                                    <div className="analysis-item opening">
+                                        <span className="label">Obertura</span>
+                                        <span className="value">{game.opening || "—"}</span>
+                                    </div>
+                                    <div className="accuracy-meters">
+                                        <div className="accuracy-item">
+                                            <span className="label">{game.username}</span>
+                                            <div className="progress-bar-container">
+                                                <div
+                                                    className="progress-bar fill-hero"
+                                                    style={{ width: `${game.accuracy?.white || 0}%` }}
+                                                ></div>
+                                            </div>
+                                            <span className="score">{game.accuracy?.white ?? "—"}%</span>
+                                        </div>
+                                        <div className="accuracy-item">
+                                            <span className="label">{game.opponent_username || "Opponent"}</span>
+                                            <div className="progress-bar-container">
+                                                <div
+                                                    className="progress-bar fill-opponent"
+                                                    style={{ width: `${game.accuracy?.black || 0}%` }}
+                                                ></div>
+                                            </div>
+                                            <span className="score">{game.accuracy?.black ?? "—"}%</span>
+                                        </div>
+                                    </div>
+
+                                    {/* EXTENDED STATS GRID */}
+                                    {game.analysis && (
+                                        <div className="analysis-grid">
+                                            <div className="analysis-stat-box">
+                                                <span className="stat-label">Possibles Blunders</span>
+                                                <div className="stat-values-row">
+                                                    <span className="val-white">⚪ {game.analysis.blunders?.white ?? 0}</span>
+                                                    <span className="val-divider">|</span>
+                                                    <span className="val-black">⚫ {game.analysis.blunders?.black ?? 0}</span>
+                                                </div>
+                                            </div>
+
+                                            <div className="analysis-stat-box">
+                                                <span className="stat-label">Agressivitat</span>
+                                                <div className="stat-values-row">
+                                                    <span className="val-white">{game.analysis.aggressiveness?.white ?? 0}%</span>
+                                                    <span className="val-divider">vs</span>
+                                                    <span className="val-black">{game.analysis.aggressiveness?.black ?? 0}%</span>
+                                                </div>
+                                            </div>
+
+                                            <div className="analysis-stat-box">
+                                                <span className="stat-label">Captures / Xecs</span>
+                                                <div className="stat-values-row">
+                                                    <span className="val-white">⚔️ {game.analysis.captures?.white}</span>
+                                                    <span className="val-black">💥 {game.analysis.checks?.white}</span>
+                                                </div>
+                                                <div className="stat-values-row">
+                                                    <span className="val-white">⚔️ {game.analysis.captures?.black}</span>
+                                                    <span className="val-black">💥 {game.analysis.checks?.black}</span>
+                                                </div>
+                                            </div>
+
+                                            <div className="analysis-stat-box">
+                                                <span className="stat-label">Material Final</span>
+                                                <span className="stat-value-single">
+                                                    {game.analysis.materialDiff > 0
+                                                        ? `+${game.analysis.materialDiff} (White)`
+                                                        : game.analysis.materialDiff < 0
+                                                            ? `+${Math.abs(game.analysis.materialDiff)} (Black)`
+                                                            : "Equal"}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
                         </div>
 
                         <div className="game-stats-bar">
