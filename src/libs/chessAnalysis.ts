@@ -22,6 +22,8 @@ const PIECE_VALUES: Record<string, number> = {
     p: 1, n: 3, b: 3, r: 5, q: 9, k: 0
 };
 
+import { ECO_CODES } from "./ecoCodes";
+
 /**
  * Validates the PGN and extracts opening + simulates accuracy + calculates heuristics
  */
@@ -40,7 +42,16 @@ export async function processGameAnalysis(pgn: string): Promise<AnalysisResult> 
             // 1. Basic Metadata
             const header = chess.header();
             const eco = header['ECO'] || "";
-            const openingName = header['Opening'] || `ECO ${eco}` || "Unknown Opening";
+            let openingName = header['Opening'] || "";
+
+            // If Opening is missing or generic/shorter than common names, try looking up ECO
+            if (!openingName || openingName.length < 5 || openingName.startsWith("ECO")) {
+                if (ECO_CODES[eco]) {
+                    openingName = ECO_CODES[eco];
+                } else if (!openingName) {
+                    openingName = eco ? `ECO ${eco}` : "Unknown Opening";
+                }
+            }
 
             // 2. Traversal & Heuristics
             const moves = chess.history({ verbose: true });
