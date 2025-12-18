@@ -1,4 +1,4 @@
-/* LandingPage.css */
+﻿/* LandingPage.css */
 
 .landing-page {
     height: 100vh;
@@ -42,19 +42,7 @@
     justify-content: center;
     align-items: center;
     text-align: center;
-    animation: fadeIn 1s ease-out;
-}
-
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+    /* Animation removed to prevent displacement */
 }
 
 .landing-logo {
@@ -67,11 +55,12 @@
     border-radius: 50%;
     border: 4px solid rgba(255, 255, 255, 0.1);
     box-shadow: 0 0 40px rgba(59, 130, 246, 0.3);
-    animation: float 6s ease-in-out infinite;
+    animation: floatLogo 6s ease-in-out infinite;
     background: white;
+    will-change: transform;
 }
 
-@keyframes float {
+@keyframes floatLogo {
 
     0%,
     100% {

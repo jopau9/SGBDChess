@@ -11,19 +11,26 @@ import Login from "./pages/Auth/Login";
 import Register from "./pages/Auth/Register";
 import Settings from "./pages/Settings/Settings";
 
+import SummaryPage from "./pages/Summary/SummaryPage";
+
 function App() {
   return (
-    <AuthProvider>
+    <>
       <Routes>
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/stats" element={<HomePage />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/profile/:username" element={<Profile />} />
-        <Route path="/game/:gameId" element={<GameDetails />} />
-        <Route path="/settings" element={<Settings />} />
+        <Route path="/summary" element={<SummaryPage />} />
       </Routes>
-    </AuthProvider>
+      <AuthProvider>
+        <Routes>
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/stats" element={<HomePage />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/profile/:username" element={<Profile />} />
+          <Route path="/game/:gameId" element={<GameDetails />} />
+          <Route path="/settings" element={<Settings />} />
+        </Routes>
+      </AuthProvider>
+    </>
   );
 }
 

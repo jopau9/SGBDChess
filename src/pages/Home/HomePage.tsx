@@ -17,15 +17,14 @@ import {
 import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { TopPlayersView } from "./TopPlayersView";
 
-import WebActivityAnalytics from "../Analytics/WebActivityAnalytics.tsx";
+
 import Header from "../../components/layout/Header";
 
 type View =
   | "openings"
   | "topPlayers"
   | "topGames"
-  | "advancedStats"
-  | "webActivity";
+  | "advancedStats";
 
 import {
   fetchPlayerFromChess,
@@ -159,19 +158,6 @@ function HomePage() {
           >
             Estadístiques avançades
           </button>
-          <button
-            className={activeView === "webActivity" ? "tab active animate-fade-in" : "tab animate-fade-in"}
-            style={{ animationDelay: "0.4s" }}
-            onClick={() => {
-              setActiveView("webActivity");
-              navigate("/stats");
-            }}
-          >
-            Web Activity
-            <br />
-            Analytics
-          </button>
-
         </nav >
 
         <main className="homepage-main">
@@ -192,9 +178,6 @@ function HomePage() {
               {activeView === "topGames" && <TopGamesView />}
               {activeView === "advancedStats" && (
                 <CommunityStats />
-              )}
-              {activeView === "webActivity" && (
-                <WebActivityAnalytics />
               )}
             </>
           )

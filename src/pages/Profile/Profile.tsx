@@ -300,9 +300,6 @@ function Profile() {
             <span className="brand">ChessStats</span>
           </div>
 
-          <Link to="/stats" className="back-link">
-            ← Tornar a l&apos;inici
-          </Link>
         </header>
 
         <main className="homepage-main">
@@ -317,334 +314,341 @@ function Profile() {
           )}
 
           {status === "ready" && player && (
-            <section className="profile">
-              {/* ---------- HEADER ---------- */}
-              <div className="profile-header">
-                {player.avatar && (
-                  <img
-                    src={player.avatar}
-                    alt={player.username}
-                    className="profile-avatar"
-                  />
-                )}
-
-                <div className="profile-main-info">
-                  <div className="profile-username-row">
-                    <h2 className="profile-username">{player.username}</h2>
-                    {player.status && (
-                      <span className="profile-status-pill">{player.status}</span>
-                    )}
-                    <FollowButton
-                      targetUsername={player.username}
-                      targetAvatar={player.avatar}
-                      className="ml-3"
+            <>
+              <div style={{ marginBottom: "1rem" }}>
+                <Link to="/stats" className="back-link">
+                  ← Tornar a l&apos;inici
+                </Link>
+              </div>
+              <section className="profile">
+                {/* ---------- HEADER ---------- */}
+                <div className="profile-header">
+                  {player.avatar && (
+                    <img
+                      src={player.avatar}
+                      alt={player.username}
+                      className="profile-avatar"
                     />
+                  )}
+
+                  <div className="profile-main-info">
+                    <div className="profile-username-row">
+                      <h2 className="profile-username">{player.username}</h2>
+                      {player.status && (
+                        <span className="profile-status-pill">{player.status}</span>
+                      )}
+                      <FollowButton
+                        targetUsername={player.username}
+                        targetAvatar={player.avatar}
+                        className="ml-3"
+                      />
+                    </div>
+
+                    {player.name && (
+                      <p className="profile-realname">{player.name}</p>
+                    )}
+                    {player.location && (
+                      <p className="profile-location">{player.location}</p>
+                    )}
+
+                    <p className="profile-joined">
+                      Membre des de: <strong>{player.joined || "–"}</strong>
+                    </p>
                   </div>
 
-                  {player.name && (
-                    <p className="profile-realname">{player.name}</p>
-                  )}
-                  {player.location && (
-                    <p className="profile-location">{player.location}</p>
-                  )}
-
-                  <p className="profile-joined">
-                    Membre des de: <strong>{player.joined || "–"}</strong>
-                  </p>
+                  <a
+                    className="profile-external-link"
+                    href={`https://www.chess.com/member/${player.username}`}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    Obrir a Chess.com
+                  </a>
                 </div>
 
-                <a
-                  className="profile-external-link"
-                  href={`https://www.chess.com/member/${player.username}`}
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  Obrir a Chess.com
-                </a>
-              </div>
+                {/* ---------- LAYOUT ---------- */}
+                <div className="profile-layout">
+                  {/* ------- SIDEBAR ------- */}
+                  <aside className="profile-sidebar">
+                    <div className="profile-sidebar-block">
+                      <h3>Stats</h3>
+                      <ul className="profile-stats-menu">
+                        <li
+                          className={activeTab === "rapid" ? "active" : ""}
+                          onClick={() => setActiveTab("rapid")}
+                        >
+                          Rapid
+                        </li>
 
-              {/* ---------- LAYOUT ---------- */}
-              <div className="profile-layout">
-                {/* ------- SIDEBAR ------- */}
-                <aside className="profile-sidebar">
-                  <div className="profile-sidebar-block">
-                    <h3>Stats</h3>
-                    <ul className="profile-stats-menu">
-                      <li
-                        className={activeTab === "rapid" ? "active" : ""}
-                        onClick={() => setActiveTab("rapid")}
-                      >
-                        Rapid
-                      </li>
+                        <li
+                          className={activeTab === "openings" ? "active" : ""}
+                          onClick={() => setActiveTab("openings")}
+                        >
+                          Openings
+                        </li>
 
-                      <li
-                        className={activeTab === "openings" ? "active" : ""}
-                        onClick={() => setActiveTab("openings")}
-                      >
-                        Openings
-                      </li>
+                        <li
+                          className={activeTab === "insights" ? "active" : ""}
+                          onClick={() => setActiveTab("insights")}
+                        >
+                          Insights
+                        </li>
 
-                      <li
-                        className={activeTab === "insights" ? "active" : ""}
-                        onClick={() => setActiveTab("insights")}
-                      >
-                        Insights
-                      </li>
-
-                      <li
-                        className={activeTab === "games" ? "active" : ""}
-                        onClick={() => setActiveTab("games")}
-                      >
-                        Partides
-                      </li>
-                    </ul>
-                  </div>
-
-                  <div className="profile-sidebar-block profile-meta">
-                    <div className="profile-meta-row">
-                      <span>Followers (Chess.com)</span>
-                      <strong>{player.followers ?? 0}</strong>
+                        <li
+                          className={activeTab === "games" ? "active" : ""}
+                          onClick={() => setActiveTab("games")}
+                        >
+                          Partides
+                        </li>
+                      </ul>
                     </div>
 
-                    <div className="profile-meta-row">
-                      <span>Last online</span>
-                      <strong>{player.last_online || "–"}</strong>
-                    </div>
-
-                    {player.is_streamer && (
+                    <div className="profile-sidebar-block profile-meta">
                       <div className="profile-meta-row">
-                        <span>Streamer</span>
-                        <strong>✔</strong>
+                        <span>Followers (Chess.com)</span>
+                        <strong>{player.followers ?? 0}</strong>
                       </div>
+
+                      <div className="profile-meta-row">
+                        <span>Last online</span>
+                        <strong>{player.last_online || "–"}</strong>
+                      </div>
+
+                      {player.is_streamer && (
+                        <div className="profile-meta-row">
+                          <span>Streamer</span>
+                          <strong>✔</strong>
+                        </div>
+                      )}
+
+                      {player.twitch_url && (
+                        <div className="profile-meta-row">
+                          <span>Twitch</span>
+                          <a href={player.twitch_url} target="_blank" rel="noreferrer">
+                            {player.twitch_url}
+                          </a>
+                        </div>
+                      )}
+                    </div>
+
+                    {myChessUsername && player.username && myChessUsername.toLowerCase() === player.username.toLowerCase() && (
+                      <FollowingList />
+                    )}
+                  </aside>
+
+                  {/* ---------- PANEL PRINCIPAL ---------- */}
+                  <section className="profile-stats-pane">
+                    <div className="stats-header">
+                      <div>
+                        {activeTab === "rapid" && <h3>All Stats</h3>}
+                        {activeTab === "openings" && <h3>Openings</h3>}
+                        {activeTab === "insights" && <h3>Insights</h3>}
+                        {activeTab === "games" && <h3>Partides Recents</h3>}
+
+                        <p className="stats-subtitle">
+                          {activeTab === "rapid" && "Resum d'elo i partides per modalitat"}
+                          {activeTab === "openings" && "Principals obertures jugades"}
+                          {activeTab === "insights" && "Dades avançades i rendiment"}
+                          {activeTab === "games" && "Historial de partides recents"}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* ======== CONTINGUT PER PESTANYA ======== */}
+
+                    {myChessUsername && player.username && myChessUsername.toLowerCase() !== player.username.toLowerCase() && (
+                      <RivalryCard
+                        myChessUsername={myChessUsername}
+                        opponentChessUsername={player.username}
+                        opponentAvatar={player.avatar}
+                      />
                     )}
 
-                    {player.twitch_url && (
-                      <div className="profile-meta-row">
-                        <span>Twitch</span>
-                        <a href={player.twitch_url} target="_blank" rel="noreferrer">
-                          {player.twitch_url}
-                        </a>
-                      </div>
-                    )}
-                  </div>
-
-                  {myChessUsername && player.username && myChessUsername.toLowerCase() === player.username.toLowerCase() && (
-                    <FollowingList />
-                  )}
-                </aside>
-
-                {/* ---------- PANEL PRINCIPAL ---------- */}
-                <section className="profile-stats-pane">
-                  <div className="stats-header">
-                    <div>
-                      {activeTab === "rapid" && <h3>All Stats</h3>}
-                      {activeTab === "openings" && <h3>Openings</h3>}
-                      {activeTab === "insights" && <h3>Insights</h3>}
-                      {activeTab === "games" && <h3>Partides Recents</h3>}
-
-                      <p className="stats-subtitle">
-                        {activeTab === "rapid" && "Resum d'elo i partides per modalitat"}
-                        {activeTab === "openings" && "Principals obertures jugades"}
-                        {activeTab === "insights" && "Dades avançades i rendiment"}
-                        {activeTab === "games" && "Historial de partides recents"}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* ======== CONTINGUT PER PESTANYA ======== */}
-
-                  {myChessUsername && player.username && myChessUsername.toLowerCase() !== player.username.toLowerCase() && (
-                    <RivalryCard
-                      myChessUsername={myChessUsername}
-                      opponentChessUsername={player.username}
-                      opponentAvatar={player.avatar}
-                    />
-                  )}
-
-                  {/* ---------- RAPID (normal) ---------- */}
-                  {activeTab === "rapid" && (
-                    <div className="stats-grid">
-                      <div className="stat-card stat-card-primary">
-                        <div className="stat-card-icon">♟️</div>
-                        <div className="stat-card-value">
-                          {stats ? totalGames : "–"}
-                        </div>
-                        <div className="stat-card-label">Games</div>
-                        <div className="stat-card-sub">
-                          Total de partides comptabilitzades
-                        </div>
-                      </div>
-
-                      <div className="stat-card">
-                        <div className="stat-card-icon">☀️</div>
-                        <div className="stat-card-value">
-                          {stats?.daily?.rating ?? "–"}
-                        </div>
-                        <div className="stat-card-label">Daily</div>
-                        <div className="stat-card-sub">
-                          {stats?.daily?.games ?? 0} games
-                        </div>
-                      </div>
-
-                      <div className="stat-card">
-                        <div className="stat-card-icon">⏱️</div>
-                        <div className="stat-card-value">
-                          {stats?.blitz?.rating ?? "–"}
-                        </div>
-                        <div className="stat-card-label">Blitz</div>
-                        <div className="stat-card-sub">
-                          {stats?.blitz?.games ?? 0} games
-                        </div>
-                      </div>
-
-                      <div className="stat-card">
-                        <div className="stat-card-icon">⚡</div>
-                        <div className="stat-card-value">
-                          {stats?.bullet?.rating ?? "–"}
-                        </div>
-                        <div className="stat-card-label">Bullet</div>
-                        <div className="stat-card-sub">
-                          {stats?.bullet?.games ?? 0} games
-                        </div>
-                      </div>
-
-                      <div className="stat-card">
-                        <div className="stat-card-icon">🎯</div>
-                        <div className="stat-card-value">
-                          {stats?.rapid?.rating ?? "–"}
-                        </div>
-                        <div className="stat-card-label">Rapid</div>
-                        <div className="stat-card-sub">
-                          {stats?.rapid?.games ?? 0} games
-                        </div>
-                      </div>
-
-                      <div className="stat-card">
-                        <div className="stat-card-icon">🧩</div>
-                        <div className="stat-card-value">
-                          {stats?.puzzles?.rating ?? "–"}
-                        </div>
-                        <div className="stat-card-label">Puzzles</div>
-                        <div className="stat-card-sub">
-                          Millor: {stats?.puzzles?.best ?? "–"}
-                        </div>
-                      </div>
-
-                      {stats?.daily960 && (
-                        <div className="stat-card">
-                          <div className="stat-card-icon">960</div>
+                    {/* ---------- RAPID (normal) ---------- */}
+                    {activeTab === "rapid" && (
+                      <div className="stats-grid">
+                        <div className="stat-card stat-card-primary">
+                          <div className="stat-card-icon">♟️</div>
                           <div className="stat-card-value">
-                            {stats.daily960.rating}
+                            {stats ? totalGames : "–"}
                           </div>
-                          <div className="stat-card-label">Daily 960</div>
+                          <div className="stat-card-label">Games</div>
                           <div className="stat-card-sub">
-                            {stats.daily960.games} games
+                            Total de partides comptabilitzades
                           </div>
                         </div>
-                      )}
-                    </div>
-                  )}
 
-                  {/* ---------- GAMES LIST ---------- */}
-                  {activeTab === "games" && (
-                    <ProfileGamesList username={username || ""} />
-                  )}
-
-                  {/* ---------- OPENINGS ---------- */}
-                  {activeTab === "openings" && (
-                    <>
-                      {loadingGames ? (
-                        <div className="loading-box">
-                          <p>
-                            Carregant partides…{" "}
-                            <strong>{liveGameCount}</strong>
-                          </p>
+                        <div className="stat-card">
+                          <div className="stat-card-icon">☀️</div>
+                          <div className="stat-card-value">
+                            {stats?.daily?.rating ?? "–"}
+                          </div>
+                          <div className="stat-card-label">Daily</div>
+                          <div className="stat-card-sub">
+                            {stats?.daily?.games ?? 0} games
+                          </div>
                         </div>
-                      ) : (
-                        <div className="openings-list">
-                          {openings.length === 0 && (
-                            <p>No s'han trobat obertures recents.</p>
-                          )}
 
-                          {openings.slice(0, 10).map((o) => (
-                            <div className="stat-card" key={o.name}>
-                              <div className="stat-card-label">{o.name}</div>
-                              <div className="stat-card-sub">
-                                {o.games} games – {o.winrate}% WR
-                                <br />
-                                W:{o.wins} / L:{o.losses} / D:{o.draws}
-                              </div>
-                            </div>
-                          ))}
+                        <div className="stat-card">
+                          <div className="stat-card-icon">⏱️</div>
+                          <div className="stat-card-value">
+                            {stats?.blitz?.rating ?? "–"}
+                          </div>
+                          <div className="stat-card-label">Blitz</div>
+                          <div className="stat-card-sub">
+                            {stats?.blitz?.games ?? 0} games
+                          </div>
                         </div>
-                      )}
-                    </>
-                  )}
 
-                  {/* ---------- INSIGHTS ---------- */}
-                  {activeTab === "insights" && (
-                    <>
-                      {loadingGames ? (
-                        <div className="loading-box">
-                          <p>
-                            Carregant partides…{" "}
-                            <strong>{liveGameCount}</strong>
-                          </p>
+                        <div className="stat-card">
+                          <div className="stat-card-icon">⚡</div>
+                          <div className="stat-card-value">
+                            {stats?.bullet?.rating ?? "–"}
+                          </div>
+                          <div className="stat-card-label">Bullet</div>
+                          <div className="stat-card-sub">
+                            {stats?.bullet?.games ?? 0} games
+                          </div>
                         </div>
-                      ) : (
-                        insights && (
-                          <div className="stats-grid">
-                            <div className="stat-card">
-                              <div className="stat-card-label">Total Games</div>
-                              <div className="stat-card-value">
-                                {insights.totalGames}
-                              </div>
-                            </div>
 
-                            <div className="stat-card">
-                              <div className="stat-card-label">Winrate</div>
-                              <div className="stat-card-value">
-                                {insights.winrate}%
-                              </div>
-                            </div>
+                        <div className="stat-card">
+                          <div className="stat-card-icon">🎯</div>
+                          <div className="stat-card-value">
+                            {stats?.rapid?.rating ?? "–"}
+                          </div>
+                          <div className="stat-card-label">Rapid</div>
+                          <div className="stat-card-sub">
+                            {stats?.rapid?.games ?? 0} games
+                          </div>
+                        </div>
 
-                            <div className="stat-card">
-                              <div className="stat-card-label">Games as White</div>
-                              <div className="stat-card-value">
-                                {insights.whiteGames}
-                              </div>
-                            </div>
+                        <div className="stat-card">
+                          <div className="stat-card-icon">🧩</div>
+                          <div className="stat-card-value">
+                            {stats?.puzzles?.rating ?? "–"}
+                          </div>
+                          <div className="stat-card-label">Puzzles</div>
+                          <div className="stat-card-sub">
+                            Millor: {stats?.puzzles?.best ?? "–"}
+                          </div>
+                        </div>
 
-                            <div className="stat-card">
-                              <div className="stat-card-label">Games as Black</div>
-                              <div className="stat-card-value">
-                                {insights.blackGames}
-                              </div>
+                        {stats?.daily960 && (
+                          <div className="stat-card">
+                            <div className="stat-card-icon">960</div>
+                            <div className="stat-card-value">
+                              {stats.daily960.rating}
                             </div>
-
-                            <div className="stat-card">
-                              <div className="stat-card-label">Avg Opponent Elo</div>
-                              <div className="stat-card-value">
-                                {insights.avgOpponentElo}
-                              </div>
-                            </div>
-
-                            <div className="stat-card">
-                              <div className="stat-card-label">
-                                Most common first move
-                              </div>
-                              <div className="stat-card-value">
-                                {insights.topFirstMove}
-                              </div>
+                            <div className="stat-card-label">Daily 960</div>
+                            <div className="stat-card-sub">
+                              {stats.daily960.games} games
                             </div>
                           </div>
-                        )
-                      )}
-                    </>
-                  )}
-                </section>
-              </div>
-            </section>
+                        )}
+                      </div>
+                    )}
+
+                    {/* ---------- GAMES LIST ---------- */}
+                    {activeTab === "games" && (
+                      <ProfileGamesList username={username || ""} />
+                    )}
+
+                    {/* ---------- OPENINGS ---------- */}
+                    {activeTab === "openings" && (
+                      <>
+                        {loadingGames ? (
+                          <div className="loading-box">
+                            <p>
+                              Carregant partides…{" "}
+                              <strong>{liveGameCount}</strong>
+                            </p>
+                          </div>
+                        ) : (
+                          <div className="openings-list">
+                            {openings.length === 0 && (
+                              <p>No s'han trobat obertures recents.</p>
+                            )}
+
+                            {openings.slice(0, 10).map((o) => (
+                              <div className="stat-card" key={o.name}>
+                                <div className="stat-card-label">{o.name}</div>
+                                <div className="stat-card-sub">
+                                  {o.games} games – {o.winrate}% WR
+                                  <br />
+                                  W:{o.wins} / L:{o.losses} / D:{o.draws}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </>
+                    )}
+
+                    {/* ---------- INSIGHTS ---------- */}
+                    {activeTab === "insights" && (
+                      <>
+                        {loadingGames ? (
+                          <div className="loading-box">
+                            <p>
+                              Carregant partides…{" "}
+                              <strong>{liveGameCount}</strong>
+                            </p>
+                          </div>
+                        ) : (
+                          insights && (
+                            <div className="stats-grid">
+                              <div className="stat-card">
+                                <div className="stat-card-label">Total Games</div>
+                                <div className="stat-card-value">
+                                  {insights.totalGames}
+                                </div>
+                              </div>
+
+                              <div className="stat-card">
+                                <div className="stat-card-label">Winrate</div>
+                                <div className="stat-card-value">
+                                  {insights.winrate}%
+                                </div>
+                              </div>
+
+                              <div className="stat-card">
+                                <div className="stat-card-label">Games as White</div>
+                                <div className="stat-card-value">
+                                  {insights.whiteGames}
+                                </div>
+                              </div>
+
+                              <div className="stat-card">
+                                <div className="stat-card-label">Games as Black</div>
+                                <div className="stat-card-value">
+                                  {insights.blackGames}
+                                </div>
+                              </div>
+
+                              <div className="stat-card">
+                                <div className="stat-card-label">Avg Opponent Elo</div>
+                                <div className="stat-card-value">
+                                  {insights.avgOpponentElo}
+                                </div>
+                              </div>
+
+                              <div className="stat-card">
+                                <div className="stat-card-label">
+                                  Most common first move
+                                </div>
+                                <div className="stat-card-value">
+                                  {insights.topFirstMove}
+                                </div>
+                              </div>
+                            </div>
+                          )
+                        )}
+                      </>
+                    )}
+                  </section>
+                </div>
+              </section>
+            </>
           )}
         </main>
       </div>
